@@ -161,9 +161,9 @@ function App() {
   const axes = ['Organic Keywords', 'Organic Traffic', 'Ref Domains', 'Authority Score', 'Paid Presence'];
   const numAxes = axes.length;
 
-  const centerX = 200;
+  const centerX = 220;
   const centerY = 200;
-  const radius = 150;
+  const radius = 140;
 
   const getPoint = (value, axisIndex) => {
     const angle = (Math.PI * 2 * axisIndex) / numAxes - Math.PI / 2;
@@ -476,7 +476,7 @@ function App() {
           alignItems: 'start'
         }}>
           {/* Spider Chart SVG */}
-          <svg width="100%" viewBox="0 0 400 400" style={{ maxWidth: '400px' }}>
+          <svg width="100%" viewBox="0 0 440 400" style={{ maxWidth: '440px' }}>
             {[20, 40, 60, 80, 100].map((percent, i) => (
               <circle
                 key={i}
