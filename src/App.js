@@ -1,173 +1,142 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-// Data configuration - UPDATE THIS MONTHLY
-const DASHBOARD_DATA = {
+// ============================================
+// CONFIGURAÇÃO - ATUALIZE ESTAS URLs
+// ============================================
+// Após publicar sua planilha Google Sheets:
+// 1. Arquivo > Compartilhar > Publicar na Web
+// 2. Selecione a aba "competitors" > CSV > Publicar
+// 3. Copie a URL e cole abaixo
+// 4. Repita para a aba "config"
+
+const SHEETS_CONFIG = {
+  // Cole aqui a URL da aba "competitors" publicada como CSV
+  competitorsUrl: 'COLE_AQUI_A_URL_DA_ABA_COMPETITORS',
+  
+  // Cole aqui a URL da aba "config" publicada como CSV  
+  configUrl: 'COLE_AQUI_A_URL_DA_ABA_CONFIG',
+  
+  // Se as URLs acima não estiverem configuradas, usa dados de fallback
+  useFallback: true
+};
+
+// Dados de fallback (usados enquanto Google Sheets não está configurado)
+const FALLBACK_DATA = {
   lastUpdated: "Fev 2026",
   competitors: [
-    { 
-      name: 'Unico', 
-      domain: 'unico.io',
-      organicKeywords: 4500,
-      keywordsTrend: 12.91,
-      organicTraffic: 39300,
-      trafficTrend: -3.45,
-      paidKeywords: 0,
-      paidTrend: 0,
-      paidTraffic: 0,
-      paidTrafficTrend: 0,
-      refDomains: 2900,
-      refTrend: -3.5,
-      authorityScore: 36,
-      authorityChange: -3,
-      tier: 'leader'
-    },
-    { 
-      name: 'ClearSale', 
-      domain: 'clear.sale',
-      organicKeywords: 3800,
-      keywordsTrend: 6.67,
-      organicTraffic: 19700,
-      trafficTrend: 1.77,
-      paidKeywords: 5,
-      paidTrend: 25,
-      paidTraffic: 994,
-      paidTrafficTrend: 26.14,
-      refDomains: 3400,
-      refTrend: -4.66,
-      authorityScore: 42,
-      authorityChange: -1,
-      tier: 'leader'
-    },
-    { 
-      name: 'idwall', 
-      domain: 'idwall.co',
-      organicKeywords: 2600,
-      keywordsTrend: -0.83,
-      organicTraffic: 12300,
-      trafficTrend: -4.67,
-      paidKeywords: 0,
-      paidTrend: 0,
-      paidTraffic: 0,
-      paidTrafficTrend: 0,
-      refDomains: 1600,
-      refTrend: -3.58,
-      authorityScore: 34,
-      authorityChange: 0,
-      tier: 'competitor'
-    },
-    { 
-      name: 'Jumio', 
-      domain: 'jumio.com',
-      organicKeywords: 170,
-      keywordsTrend: -3.41,
-      organicTraffic: 517,
-      trafficTrend: 1.77,
-      paidKeywords: 1,
-      paidTrend: -50,
-      paidTraffic: 2,
-      paidTrafficTrend: -71.43,
-      refDomains: 8800,
-      refTrend: 0.4,
-      authorityScore: 42,
-      authorityChange: 0,
-      tier: 'global'
-    },
-    { 
-      name: 'CAF (legacy)', 
-      domain: 'caf.io',
-      organicKeywords: 681,
-      keywordsTrend: -20.35,
-      organicTraffic: 1300,
-      trafficTrend: -13.23,
-      paidKeywords: 2,
-      paidTrend: -33.33,
-      paidTraffic: 54,
-      paidTrafficTrend: -37.93,
-      refDomains: 3300,
-      refTrend: 1.95,
-      authorityScore: 30,
-      authorityChange: 0,
-      tier: 'legacy',
-      isOwn: true
-    },
-    { 
-      name: 'Certta', 
-      domain: 'certta.ai',
-      organicKeywords: 76,
-      keywordsTrend: 216.67,
-      organicTraffic: 60,
-      trafficTrend: 71.43,
-      paidKeywords: 0,
-      paidTrend: 0,
-      paidTraffic: 0,
-      paidTrafficTrend: 0,
-      refDomains: 646,
-      refTrend: 1645.95,
-      authorityScore: 18,
-      authorityChange: 16,
-      tier: 'new',
-      isOwn: true,
-      highlight: true
-    }
+    { domain: 'unico.io', name: 'Unico', tier: 'leader', organicKeywords: 4500, keywordsTrend: 12.91, organicTraffic: 39300, trafficTrend: -3.45, paidKeywords: 0, paidTrend: 0, paidTraffic: 0, paidTrafficTrend: 0, refDomains: 2900, refTrend: -3.5, authorityScore: 36, authorityChange: -3, isOwn: false, highlight: false },
+    { domain: 'clear.sale', name: 'ClearSale', tier: 'leader', organicKeywords: 3800, keywordsTrend: 6.67, organicTraffic: 19700, trafficTrend: 1.77, paidKeywords: 5, paidTrend: 25, paidTraffic: 994, paidTrafficTrend: 26.14, refDomains: 3400, refTrend: -4.66, authorityScore: 42, authorityChange: -1, isOwn: false, highlight: false },
+    { domain: 'idwall.co', name: 'idwall', tier: 'competitor', organicKeywords: 2600, keywordsTrend: -0.83, organicTraffic: 12300, trafficTrend: -4.67, paidKeywords: 0, paidTrend: 0, paidTraffic: 0, paidTrafficTrend: 0, refDomains: 1600, refTrend: -3.58, authorityScore: 34, authorityChange: 0, isOwn: false, highlight: false },
+    { domain: 'jumio.com', name: 'Jumio', tier: 'global', organicKeywords: 170, keywordsTrend: -3.41, organicTraffic: 517, trafficTrend: 1.77, paidKeywords: 1, paidTrend: -50, paidTraffic: 2, paidTrafficTrend: -71.43, refDomains: 8800, refTrend: 0.4, authorityScore: 42, authorityChange: 0, isOwn: false, highlight: false },
+    { domain: 'caf.io', name: 'CAF (legacy)', tier: 'legacy', organicKeywords: 681, keywordsTrend: -20.35, organicTraffic: 1300, trafficTrend: -13.23, paidKeywords: 2, paidTrend: -33.33, paidTraffic: 54, paidTrafficTrend: -37.93, refDomains: 3300, refTrend: 1.95, authorityScore: 30, authorityChange: 0, isOwn: true, highlight: false },
+    { domain: 'certta.ai', name: 'Certta', tier: 'new', organicKeywords: 76, keywordsTrend: 216.67, organicTraffic: 60, trafficTrend: 71.43, paidKeywords: 0, paidTrend: 0, paidTraffic: 0, paidTrafficTrend: 0, refDomains: 646, refTrend: 1645.95, authorityScore: 18, authorityChange: 16, isOwn: true, highlight: true }
   ]
 };
+
+// Parser de CSV
+function parseCSV(csvText) {
+  const lines = csvText.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.trim());
+  const data = [];
+  
+  for (let i = 1; i < lines.length; i++) {
+    const values = lines[i].split(',').map(v => v.trim());
+    const row = {};
+    headers.forEach((header, index) => {
+      let value = values[index] || '';
+      if (['organicKeywords', 'organicTraffic', 'paidKeywords', 'paidTraffic', 'refDomains', 'authorityScore', 'authorityChange'].includes(header)) {
+        value = parseInt(value) || 0;
+      } else if (['keywordsTrend', 'trafficTrend', 'paidTrend', 'paidTrafficTrend', 'refTrend'].includes(header)) {
+        value = parseFloat(value) || 0;
+      } else if (['isOwn', 'highlight'].includes(header)) {
+        value = value.toUpperCase() === 'TRUE';
+      }
+      row[header] = value;
+    });
+    data.push(row);
+  }
+  return data;
+}
 
 function App() {
   const [hoveredRow, setHoveredRow] = useState(null);
   const [hoveredCompetitor, setHoveredCompetitor] = useState(null);
-  
-  const { competitors, lastUpdated } = DASHBOARD_DATA;
+  const [competitors, setCompetitors] = useState(FALLBACK_DATA.competitors);
+  const [lastUpdated, setLastUpdated] = useState(FALLBACK_DATA.lastUpdated);
+  const [dataSource, setDataSource] = useState('fallback');
+  const [loading, setLoading] = useState(true);
 
-  // Spider chart data - normalized to 0-100 scale
+  useEffect(() => {
+    async function fetchData() {
+      if (SHEETS_CONFIG.competitorsUrl.includes('COLE_AQUI')) {
+        setDataSource('fallback');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const competitorsResponse = await fetch(SHEETS_CONFIG.competitorsUrl);
+        const competitorsCSV = await competitorsResponse.text();
+        const competitorsData = parseCSV(competitorsCSV);
+        
+        if (competitorsData.length > 0) {
+          setCompetitors(competitorsData);
+          setDataSource('sheets');
+        }
+
+        if (!SHEETS_CONFIG.configUrl.includes('COLE_AQUI')) {
+          const configResponse = await fetch(SHEETS_CONFIG.configUrl);
+          const configCSV = await configResponse.text();
+          const configData = parseCSV(configCSV);
+          const lastUpdatedRow = configData.find(row => row.key === 'lastUpdated');
+          if (lastUpdatedRow) {
+            setLastUpdated(lastUpdatedRow.value);
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados do Google Sheets:', error);
+        setDataSource('fallback');
+      }
+      
+      setLoading(false);
+    }
+
+    fetchData();
+  }, []);
+
+  // Computed data
+  const certtaData = competitors.find(c => c.domain === 'certta.ai') || {};
+  const cafData = competitors.find(c => c.domain === 'caf.io') || {};
+  
+  // Combined Certta metrics (certta.ai + caf.io)
+  const certtaCombined = {
+    organicKeywords: (certtaData.organicKeywords || 0) + (cafData.organicKeywords || 0),
+    organicTraffic: (certtaData.organicTraffic || 0) + (cafData.organicTraffic || 0),
+    refDomains: (certtaData.refDomains || 0) + (cafData.refDomains || 0),
+    authorityScore: Math.max(certtaData.authorityScore || 0, cafData.authorityScore || 0),
+    paidPresence: (certtaData.paidTraffic || 0) + (cafData.paidTraffic || 0)
+  };
+
   const spiderCompetitors = [
     {
       name: 'Certta (combined)',
       color: '#10b981',
-      organicKeywords: 757,
-      organicTraffic: 1360,
-      refDomains: 3946,
-      authorityScore: 30,
-      paidPresence: 56
+      ...certtaCombined
     },
-    {
-      name: 'Unico',
-      color: '#3b82f6',
-      organicKeywords: 4500,
-      organicTraffic: 39300,
-      refDomains: 2900,
-      authorityScore: 36,
-      paidPresence: 0
-    },
-    {
-      name: 'ClearSale',
-      color: '#8b5cf6',
-      organicKeywords: 3800,
-      organicTraffic: 19700,
-      refDomains: 3400,
-      authorityScore: 42,
-      paidPresence: 999
-    },
-    {
-      name: 'idwall',
-      color: '#f59e0b',
-      organicKeywords: 2600,
-      organicTraffic: 12300,
-      refDomains: 1600,
-      authorityScore: 34,
-      paidPresence: 0
-    },
-    {
-      name: 'Jumio',
-      color: '#ec4899',
-      organicKeywords: 170,
-      organicTraffic: 517,
-      refDomains: 8800,
-      authorityScore: 42,
-      paidPresence: 3
-    }
+    ...competitors
+      .filter(c => !c.isOwn && c.tier !== 'enterprise')
+      .slice(0, 4)
+      .map((c, idx) => ({
+        name: c.name,
+        color: ['#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899'][idx],
+        organicKeywords: c.organicKeywords,
+        organicTraffic: c.organicTraffic,
+        refDomains: c.refDomains,
+        authorityScore: c.authorityScore,
+        paidPresence: c.paidTraffic + c.paidKeywords
+      }))
   ];
 
-  // Find max values for normalization
   const maxValues = {
     organicKeywords: Math.max(...spiderCompetitors.map(c => c.organicKeywords)),
     organicTraffic: Math.max(...spiderCompetitors.map(c => c.organicTraffic)),
@@ -176,7 +145,6 @@ function App() {
     paidPresence: Math.max(...spiderCompetitors.map(c => c.paidPresence)) || 1
   };
 
-  // Normalize to 0-100
   const normalizeData = (competitor) => ({
     name: competitor.name,
     color: competitor.color,
@@ -193,7 +161,6 @@ function App() {
   const axes = ['Organic Keywords', 'Organic Traffic', 'Ref Domains', 'Authority Score', 'Paid Presence'];
   const numAxes = axes.length;
 
-  // Spider chart geometry
   const centerX = 200;
   const centerY = 200;
   const radius = 150;
@@ -252,11 +219,77 @@ function App() {
     return styles[tier] || styles.competitor;
   };
 
-  // Calculate migration health
-  const cafData = competitors.find(c => c.domain === 'caf.io');
-  const certtaData = competitors.find(c => c.domain === 'certta.ai');
   const migrationProgress = certtaData && cafData ? 
-    Math.round((certtaData.organicTraffic / (certtaData.organicTraffic + cafData.organicTraffic)) * 100) : 0;
+    Math.round(((certtaData.organicTraffic || 0) / ((certtaData.organicTraffic || 0) + (cafData.organicTraffic || 1))) * 100) : 0;
+
+  // KPI Card Component
+  const KpiCard = ({ label, value, trend, trendLabel, icon }) => (
+    <div style={{
+      background: '#0f172a',
+      borderRadius: '12px',
+      padding: '16px',
+      border: '1px solid #334155',
+      minWidth: '140px'
+    }}>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        marginBottom: '8px'
+      }}>
+        <span style={{ fontSize: '16px' }}>{icon}</span>
+        <span style={{
+          fontSize: '11px',
+          color: '#64748b',
+          textTransform: 'uppercase',
+          letterSpacing: '0.5px'
+        }}>
+          {label}
+        </span>
+      </div>
+      <div style={{
+        fontSize: '24px',
+        fontWeight: '700',
+        color: '#f8fafc',
+        marginBottom: '4px'
+      }}>
+        {value}
+      </div>
+      {trend !== undefined && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          fontSize: '12px',
+          color: getTrendColor(trend),
+          fontWeight: '500'
+        }}>
+          <span>{getTrendIcon(trend)}</span>
+          <span>{Math.abs(trend).toFixed(1)}%</span>
+          {trendLabel && <span style={{ color: '#64748b', marginLeft: '4px' }}>{trendLabel}</span>}
+        </div>
+      )}
+    </div>
+  );
+
+  if (loading) {
+    return (
+      <div style={{
+        fontFamily: "'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif",
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#e2e8f0'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '24px', marginBottom: '16px' }}>⏳</div>
+          <div>Carregando dados...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{
@@ -272,7 +305,8 @@ function App() {
           display: 'flex', 
           alignItems: 'center', 
           gap: '12px',
-          marginBottom: '8px'
+          marginBottom: '8px',
+          flexWrap: 'wrap'
         }}>
           <h1 style={{ 
             fontSize: '28px', 
@@ -292,6 +326,16 @@ function App() {
             fontWeight: '500'
           }}>
             LIVE
+          </span>
+          <span style={{
+            background: dataSource === 'sheets' ? '#3b82f620' : '#f59e0b20',
+            color: dataSource === 'sheets' ? '#3b82f6' : '#f59e0b',
+            padding: '4px 12px',
+            borderRadius: '20px',
+            fontSize: '11px',
+            fontWeight: '500'
+          }}>
+            {dataSource === 'sheets' ? '📊 Google Sheets' : '📁 Dados Locais'}
           </span>
         </div>
         <p style={{ 
@@ -371,7 +415,7 @@ function App() {
             color: '#ef4444',
             marginBottom: '4px'
           }}>
-            {cafData ? `${cafData.trafficTrend}%` : 'N/A'}
+            {cafData.trafficTrend || 0}%
           </div>
           <div style={{ 
             fontSize: '13px', 
@@ -397,7 +441,7 @@ function App() {
             color: '#10b981',
             marginBottom: '4px'
           }}>
-            +{certtaData ? certtaData.trafficTrend : 0}%
+            +{certtaData.trafficTrend || 0}%
           </div>
           <div style={{ 
             fontSize: '13px', 
@@ -429,11 +473,10 @@ function App() {
           display: 'grid',
           gridTemplateColumns: 'minmax(300px, 400px) 1fr',
           gap: '32px',
-          alignItems: 'center'
+          alignItems: 'start'
         }}>
           {/* Spider Chart SVG */}
           <svg width="100%" viewBox="0 0 400 400" style={{ maxWidth: '400px' }}>
-            {/* Background circles */}
             {[20, 40, 60, 80, 100].map((percent, i) => (
               <circle
                 key={i}
@@ -447,7 +490,6 @@ function App() {
               />
             ))}
             
-            {/* Axis lines */}
             {axes.map((_, i) => {
               const point = getPoint(100, i);
               return (
@@ -463,7 +505,6 @@ function App() {
               );
             })}
             
-            {/* Axis labels */}
             {axes.map((label, i) => {
               const point = getPoint(120, i);
               const isTop = i === 0;
@@ -484,7 +525,6 @@ function App() {
               );
             })}
             
-            {/* Data polygons */}
             {normalizedData.map((competitor, idx) => (
               <polygon
                 key={competitor.name}
@@ -497,7 +537,6 @@ function App() {
               />
             ))}
             
-            {/* Data points */}
             {normalizedData.map((competitor, idx) => (
               competitor.values.map((value, i) => {
                 const point = getPoint(value, i);
@@ -515,7 +554,6 @@ function App() {
               })
             ))}
             
-            {/* Scale labels */}
             {[25, 50, 75, 100].map((percent, i) => (
               <text
                 key={i}
@@ -530,51 +568,108 @@ function App() {
             ))}
           </svg>
 
-          {/* Legend and Insights */}
-          <div>
-            {/* Legend */}
-            <div style={{ marginBottom: '24px' }}>
-              <div style={{ 
-                fontSize: '12px', 
-                color: '#64748b', 
-                marginBottom: '12px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}>
-                Competitors
+          {/* Right side: Legend + KPIs + Insights */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            
+            {/* Top row: Legend + KPIs */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '180px 1fr',
+              gap: '24px',
+              alignItems: 'start'
+            }}>
+              {/* Legend */}
+              <div>
+                <div style={{ 
+                  fontSize: '12px', 
+                  color: '#64748b', 
+                  marginBottom: '12px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
+                  Competitors
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {normalizedData.map((competitor, idx) => (
+                    <div
+                      key={competitor.name}
+                      onMouseEnter={() => setHoveredCompetitor(idx)}
+                      onMouseLeave={() => setHoveredCompetitor(null)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '6px 10px',
+                        borderRadius: '6px',
+                        background: hoveredCompetitor === idx ? '#33415530' : 'transparent',
+                        cursor: 'pointer',
+                        transition: 'background 0.15s ease'
+                      }}
+                    >
+                      <div style={{
+                        width: '10px',
+                        height: '10px',
+                        borderRadius: '2px',
+                        background: competitor.color,
+                        flexShrink: 0
+                      }} />
+                      <span style={{ 
+                        fontSize: '13px',
+                        fontWeight: competitor.name.includes('Certta') ? '600' : '400',
+                        color: competitor.name.includes('Certta') ? '#10b981' : '#e2e8f0'
+                      }}>
+                        {competitor.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {normalizedData.map((competitor, idx) => (
-                  <div
-                    key={competitor.name}
-                    onMouseEnter={() => setHoveredCompetitor(idx)}
-                    onMouseLeave={() => setHoveredCompetitor(null)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      background: hoveredCompetitor === idx ? '#33415520' : 'transparent',
-                      cursor: 'pointer',
-                      transition: 'background 0.15s ease'
-                    }}
-                  >
-                    <div style={{
-                      width: '12px',
-                      height: '12px',
-                      borderRadius: '3px',
-                      background: competitor.color
-                    }} />
-                    <span style={{ 
-                      fontSize: '14px',
-                      fontWeight: competitor.name.includes('Certta') ? '600' : '400',
-                      color: competitor.name.includes('Certta') ? '#10b981' : '#e2e8f0'
-                    }}>
-                      {competitor.name}
-                    </span>
-                  </div>
-                ))}
+
+              {/* Certta KPIs */}
+              <div>
+                <div style={{ 
+                  fontSize: '12px', 
+                  color: '#64748b', 
+                  marginBottom: '12px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
+                  🎯 Certta Combined Metrics
+                </div>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+                  gap: '12px'
+                }}>
+                  <KpiCard 
+                    icon="🔑"
+                    label="Keywords"
+                    value={formatNumber(certtaCombined.organicKeywords)}
+                    trend={(certtaData.keywordsTrend || 0)}
+                    trendLabel="MoM"
+                  />
+                  <KpiCard 
+                    icon="📈"
+                    label="Org. Traffic"
+                    value={formatNumber(certtaCombined.organicTraffic)}
+                    trend={(certtaData.trafficTrend || 0)}
+                    trendLabel="MoM"
+                  />
+                  <KpiCard 
+                    icon="🔗"
+                    label="Ref Domains"
+                    value={formatNumber(certtaCombined.refDomains)}
+                    trend={(certtaData.refTrend || 0)}
+                    trendLabel="MoM"
+                  />
+                  <KpiCard 
+                    icon="⭐"
+                    label="Authority"
+                    value={certtaCombined.authorityScore}
+                    trend={certtaData.authorityChange || 0}
+                    trendLabel="pts"
+                  />
+                </div>
               </div>
             </div>
 
@@ -592,14 +687,14 @@ function App() {
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px'
               }}>
-                📈 Radar Analysis
+                📊 Radar Analysis
               </div>
               <div style={{ fontSize: '13px', color: '#94a3b8', lineHeight: '1.7' }}>
-                <p style={{ margin: '0 0 12px 0' }}>
-                  <strong style={{ color: '#10b981' }}>Certta's strength:</strong> Ref Domains (3.9K combined) competitive with market leaders due to caf.io legacy backlinks.
+                <p style={{ margin: '0 0 10px 0' }}>
+                  <strong style={{ color: '#10b981' }}>Certta's strength:</strong> Ref Domains ({formatNumber(certtaCombined.refDomains)} combined) competitive with market leaders due to caf.io legacy backlinks.
                 </p>
-                <p style={{ margin: '0 0 12px 0' }}>
-                  <strong style={{ color: '#ef4444' }}>Critical gaps:</strong> Organic Traffic 29x below Unico, Keywords 6x below ClearSale. These are volume metrics that take 6-12 months to build.
+                <p style={{ margin: '0 0 10px 0' }}>
+                  <strong style={{ color: '#ef4444' }}>Critical gaps:</strong> Organic Traffic {Math.round(maxValues.organicTraffic / certtaCombined.organicTraffic)}x below market leader. Volume metrics take 6-12 months to build.
                 </p>
                 <p style={{ margin: 0 }}>
                   <strong style={{ color: '#f59e0b' }}>Opportunity:</strong> Jumio has high authority (42) but low BR traffic — international player without local SEO. Certta can capture BR-specific demand.
@@ -868,9 +963,9 @@ function App() {
             margin: 0,
             lineHeight: '1.6'
           }}>
-            <strong>Certta.ai</strong> shows explosive early growth (+216% keywords, +1645% ref domains), 
-            but absolute traffic (60/mo) remains negligible. <strong>Caf.io</strong> still holds 95% of organic 
-            equity but is bleeding 13-20% monthly. Critical migration window: 3-6 months.
+            <strong>Certta.ai</strong> shows explosive early growth (+{certtaData.keywordsTrend || 0}% keywords), 
+            but absolute traffic ({certtaData.organicTraffic || 0}/mo) remains limited. <strong>Caf.io</strong> still holds majority of organic 
+            equity but is declining {cafData.trafficTrend || 0}% monthly.
           </p>
         </div>
         
@@ -896,9 +991,8 @@ function App() {
             margin: 0,
             lineHeight: '1.6'
           }}>
-            Market leaders (Unico, ClearSale) have 15-30x Certta's organic traffic. 
-            Gap is structural, not tactical. Priority: accelerate certta.ai authority 
-            build while managing caf.io decay. Target Authority Score: 35+ within 6 months.
+            Market leaders have significantly more organic traffic than Certta. 
+            Priority: accelerate certta.ai authority build while managing caf.io transition.
           </p>
         </div>
       </div>
