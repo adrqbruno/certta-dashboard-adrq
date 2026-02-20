@@ -10,11 +10,11 @@ import React, { useState, useEffect } from 'react';
 // 4. Repita para a aba "config"
 
 const SHEETS_CONFIG = {
-  // Cole aqui a URL da aba "competitors" publicada como CSV
-  competitorsUrl: 'COLE_AQUI_A_URL_DA_ABA_COMPETITORS',
+  // URL da aba "competitors" publicada como CSV
+  competitorsUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSlkIr00Ua6EYb3DLBehpFqWvdXd0LSexCXHLaIfRLCOIpG5nm5vOlZ4hKZqWwLXg/pub?gid=1560647113&single=true&output=csv',
   
-  // Cole aqui a URL da aba "config" publicada como CSV  
-  configUrl: 'COLE_AQUI_A_URL_DA_ABA_CONFIG',
+  // URL da aba "config" publicada como CSV  
+  configUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSlkIr00Ua6EYb3DLBehpFqWvdXd0LSexCXHLaIfRLCOIpG5nm5vOlZ4hKZqWwLXg/pub?gid=109836250&single=true&output=csv',
   
   // Se as URLs acima não estiverem configuradas, usa dados de fallback
   useFallback: true
