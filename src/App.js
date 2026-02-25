@@ -3,24 +3,15 @@ import React, { useState, useEffect } from 'react';
 // ============================================
 // CONFIGURAÇÃO - ATUALIZE ESTAS URLs
 // ============================================
-// Após publicar sua planilha Google Sheets:
-// 1. Arquivo > Compartilhar > Publicar na Web
-// 2. Selecione a aba "competitors" > CSV > Publicar
-// 3. Copie a URL e cole abaixo
-// 4. Repita para a aba "config"
-
 const SHEETS_CONFIG = {
-  // URL da aba "competitors" publicada como CSV
   competitorsUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSlkIr00Ua6EYb3DLBehpFqWvdXd0LSexCXHLaIfRLCOIpG5nm5vOlZ4hKZqWwLXg/pub?gid=1560647113&single=true&output=csv',
-  
-  // URL da aba "config" publicada como CSV  
   configUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSlkIr00Ua6EYb3DLBehpFqWvdXd0LSexCXHLaIfRLCOIpG5nm5vOlZ4hKZqWwLXg/pub?gid=109836250&single=true&output=csv',
-  
-  // Se as URLs acima não estiverem configuradas, usa dados de fallback
+  // Futura URL para dados do funnel (quando disponível)
+  funnelUrl: 'COLE_AQUI_A_URL_DA_ABA_FUNNEL',
   useFallback: true
 };
 
-// Dados de fallback (usados enquanto Google Sheets não está configurado)
+// Dados de fallback - Competitors
 const FALLBACK_DATA = {
   lastUpdated: "Fev 2026",
   competitors: [
@@ -31,6 +22,25 @@ const FALLBACK_DATA = {
     { domain: 'caf.io', name: 'CAF (legacy)', tier: 'legacy', organicKeywords: 681, keywordsTrend: -20.35, organicTraffic: 1300, trafficTrend: -13.23, paidKeywords: 2, paidTrend: -33.33, paidTraffic: 54, paidTrafficTrend: -37.93, refDomains: 3300, refTrend: 1.95, authorityScore: 30, authorityChange: 0, isOwn: true, highlight: false },
     { domain: 'certta.ai', name: 'Certta', tier: 'new', organicKeywords: 76, keywordsTrend: 216.67, organicTraffic: 60, trafficTrend: 71.43, paidKeywords: 0, paidTrend: 0, paidTraffic: 0, paidTrafficTrend: 0, refDomains: 646, refTrend: 1645.95, authorityScore: 18, authorityChange: 16, isOwn: true, highlight: true }
   ]
+};
+
+// Dados DUMMY do Funnel - Substituir por dados reais depois
+const FUNNEL_DATA = {
+  period: "YTD 2026",
+  // KPIs principais
+  leads: { value: 1869, trend: 12.5 },
+  mql: { value: 1235, trend: 8.2 },
+  sql: { value: 262, trend: 15.1 },
+  proposals: { value: 75, trend: 5.6 },
+  wonDeals: { value: 33, trend: 2.1 },
+  // Taxas
+  winRate: { value: 29.3, trend: 1.4 },
+  // Financeiro
+  adsSpend: { value: 416200, trend: -3.2 },
+  cac: { value: 2500, trend: -5.0 },
+  cpa: { value: 152.30, trend: 4.8 },
+  dealValue: { value: 666700, trend: 8.5 },
+  roas: { value: 1.6, trend: 15.0 }
 };
 
 // Parser de CSV
@@ -63,6 +73,7 @@ function App() {
   const [hoveredCompetitor, setHoveredCompetitor] = useState(null);
   const [competitors, setCompetitors] = useState(FALLBACK_DATA.competitors);
   const [lastUpdated, setLastUpdated] = useState(FALLBACK_DATA.lastUpdated);
+  const [funnelData] = useState(FUNNEL_DATA);
   const [dataSource, setDataSource] = useState('fallback');
   const [loading, setLoading] = useState(true);
 
@@ -108,7 +119,7 @@ function App() {
   const certtaData = competitors.find(c => c.domain === 'certta.ai') || {};
   const cafData = competitors.find(c => c.domain === 'caf.io') || {};
   
-  // Combined Certta metrics (certta.ai + caf.io)
+  // Combined Certta metrics
   const certtaCombined = {
     organicKeywords: (certtaData.organicKeywords || 0) + (cafData.organicKeywords || 0),
     organicTraffic: (certtaData.organicTraffic || 0) + (cafData.organicTraffic || 0),
@@ -118,11 +129,7 @@ function App() {
   };
 
   const spiderCompetitors = [
-    {
-      name: 'Certta (combined)',
-      color: '#10b981',
-      ...certtaCombined
-    },
+    { name: 'Certta (combined)', color: '#10b981', ...certtaCombined },
     ...competitors
       .filter(c => !c.isOwn && c.tier !== 'enterprise')
       .slice(0, 4)
@@ -187,6 +194,12 @@ function App() {
     return num.toString();
   };
 
+  const formatCurrency = (num) => {
+    if (num >= 1000000) return `R$ ${(num / 1000000).toFixed(1)}M`;
+    if (num >= 1000) return `R$ ${(num / 1000).toFixed(1)}K`;
+    return `R$ ${num.toFixed(0)}`;
+  };
+
   const getTrendColor = (value) => {
     if (value > 10) return '#10b981';
     if (value > 0) return '#6ee7b7';
@@ -221,6 +234,15 @@ function App() {
 
   const migrationProgress = certtaData && cafData ? 
     Math.round(((certtaData.organicTraffic || 0) / ((certtaData.organicTraffic || 0) + (cafData.organicTraffic || 1))) * 100) : 0;
+
+  // Funnel conversion rates
+  const funnelStages = [
+    { name: 'Leads', value: funnelData.leads.value, color: '#3b82f6' },
+    { name: 'MQL', value: funnelData.mql.value, color: '#f97316' },
+    { name: 'SQL', value: funnelData.sql.value, color: '#8b5cf6' },
+    { name: 'Proposals', value: funnelData.proposals.value, color: '#06b6d4' },
+    { name: 'Won', value: funnelData.wonDeals.value, color: '#10b981' }
+  ];
 
   // KPI Card Component
   const KpiCard = ({ label, value, trend, trendLabel, icon }) => (
@@ -272,6 +294,47 @@ function App() {
     </div>
   );
 
+  // Funnel KPI Card - Smaller version
+  const FunnelKpiCard = ({ label, value, trend, color }) => (
+    <div style={{
+      background: '#0f172a',
+      borderRadius: '10px',
+      padding: '14px',
+      border: '1px solid #334155'
+    }}>
+      <div style={{
+        fontSize: '10px',
+        color: '#64748b',
+        textTransform: 'uppercase',
+        letterSpacing: '0.5px',
+        marginBottom: '6px'
+      }}>
+        {label}
+      </div>
+      <div style={{
+        fontSize: '22px',
+        fontWeight: '700',
+        color: color || '#f8fafc',
+        marginBottom: '4px'
+      }}>
+        {value}
+      </div>
+      {trend !== undefined && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          fontSize: '11px',
+          color: getTrendColor(trend),
+          fontWeight: '500'
+        }}>
+          <span>{getTrendIcon(trend)}</span>
+          <span>{Math.abs(trend).toFixed(1)}% MoM</span>
+        </div>
+      )}
+    </div>
+  );
+
   if (loading) {
     return (
       <div style={{
@@ -315,7 +378,7 @@ function App() {
             margin: 0,
             letterSpacing: '-0.5px'
           }}>
-            Competitive Authority Monitor
+            Certta Performance Hub
           </h1>
           <span style={{
             background: '#10b98120',
@@ -343,7 +406,7 @@ function App() {
           fontSize: '14px',
           margin: 0 
         }}>
-          SEO & Digital Authority benchmarking • Source: Semrush • Updated: {lastUpdated}
+          Smarketing & SEO Performance Dashboard • Updated: {lastUpdated}
         </p>
       </div>
 
@@ -448,6 +511,237 @@ function App() {
             color: '#94a3b8' 
           }}>
             Organic traffic MoM
+          </div>
+        </div>
+      </div>
+
+      {/* ============================================ */}
+      {/* SMARKETING FUNNEL SECTION */}
+      {/* ============================================ */}
+      <div style={{
+        background: '#1e293b',
+        borderRadius: '16px',
+        padding: '24px',
+        marginBottom: '24px',
+        border: '1px solid #334155'
+      }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '20px'
+        }}>
+          <div style={{ 
+            fontSize: '16px', 
+            fontWeight: '600',
+            color: '#f8fafc'
+          }}>
+            Smarketing Performance
+          </div>
+          <span style={{
+            background: '#06b6d420',
+            color: '#06b6d4',
+            padding: '4px 12px',
+            borderRadius: '12px',
+            fontSize: '11px',
+            fontWeight: '500'
+          }}>
+            {funnelData.period}
+          </span>
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '24px'
+        }}>
+          {/* Left side: KPIs Grid */}
+          <div>
+            {/* Row 1: Volume metrics */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '12px',
+              marginBottom: '12px'
+            }}>
+              <FunnelKpiCard 
+                label="Leads" 
+                value={formatNumber(funnelData.leads.value)} 
+                trend={funnelData.leads.trend}
+                color="#3b82f6"
+              />
+              <FunnelKpiCard 
+                label="MQL" 
+                value={formatNumber(funnelData.mql.value)} 
+                trend={funnelData.mql.trend}
+                color="#f97316"
+              />
+              <FunnelKpiCard 
+                label="SQL" 
+                value={formatNumber(funnelData.sql.value)} 
+                trend={funnelData.sql.trend}
+                color="#8b5cf6"
+              />
+            </div>
+
+            {/* Row 2: Conversion metrics */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '12px',
+              marginBottom: '12px'
+            }}>
+              <FunnelKpiCard 
+                label="Proposals" 
+                value={funnelData.proposals.value} 
+                trend={funnelData.proposals.trend}
+                color="#06b6d4"
+              />
+              <FunnelKpiCard 
+                label="Won Deals" 
+                value={funnelData.wonDeals.value} 
+                trend={funnelData.wonDeals.trend}
+                color="#10b981"
+              />
+              <FunnelKpiCard 
+                label="Win Rate %" 
+                value={`${funnelData.winRate.value}%`} 
+                trend={funnelData.winRate.trend}
+                color="#10b981"
+              />
+            </div>
+
+            {/* Row 3: Financial metrics */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '12px'
+            }}>
+              <FunnelKpiCard 
+                label="Ads Spend" 
+                value={formatCurrency(funnelData.adsSpend.value)} 
+                trend={funnelData.adsSpend.trend}
+              />
+              <FunnelKpiCard 
+                label="CAC" 
+                value={formatCurrency(funnelData.cac.value)} 
+                trend={funnelData.cac.trend}
+              />
+              <FunnelKpiCard 
+                label="ROAS" 
+                value={`${funnelData.roas.value}x`} 
+                trend={funnelData.roas.trend}
+                color={funnelData.roas.value >= 1.5 ? '#10b981' : '#f59e0b'}
+              />
+            </div>
+          </div>
+
+          {/* Right side: Funnel Visualization */}
+          <div style={{
+            background: '#0f172a',
+            borderRadius: '12px',
+            padding: '20px',
+            border: '1px solid #334155'
+          }}>
+            <div style={{
+              fontSize: '11px',
+              color: '#64748b',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              marginBottom: '16px'
+            }}>
+              Sales Funnel
+            </div>
+
+            {/* Funnel bars */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {funnelStages.map((stage, idx) => {
+                const maxValue = funnelStages[0].value;
+                const percentage = (stage.value / maxValue) * 100;
+                const conversionRate = idx > 0 
+                  ? ((stage.value / funnelStages[idx - 1].value) * 100).toFixed(1)
+                  : 100;
+                
+                return (
+                  <div key={stage.name}>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '6px'
+                    }}>
+                      <span style={{ 
+                        fontSize: '12px', 
+                        color: '#94a3b8',
+                        fontWeight: '500'
+                      }}>
+                        {stage.name}
+                      </span>
+                      <span style={{ 
+                        fontSize: '14px', 
+                        color: '#f8fafc',
+                        fontWeight: '600'
+                      }}>
+                        {formatNumber(stage.value)}
+                      </span>
+                    </div>
+                    <div style={{
+                      position: 'relative',
+                      height: '28px',
+                      background: '#1e293b',
+                      borderRadius: '6px',
+                      overflow: 'hidden'
+                    }}>
+                      <div style={{
+                        width: `${percentage}%`,
+                        height: '100%',
+                        background: `linear-gradient(90deg, ${stage.color}, ${stage.color}cc)`,
+                        borderRadius: '6px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        paddingLeft: '10px',
+                        transition: 'width 0.5s ease'
+                      }}>
+                        <span style={{
+                          fontSize: '11px',
+                          fontWeight: '600',
+                          color: '#fff'
+                        }}>
+                          {conversionRate}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Summary stats */}
+            <div style={{
+              marginTop: '20px',
+              paddingTop: '16px',
+              borderTop: '1px solid #334155',
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '16px'
+            }}>
+              <div>
+                <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>
+                  Lead → Won
+                </div>
+                <div style={{ fontSize: '18px', fontWeight: '700', color: '#10b981' }}>
+                  {((funnelData.wonDeals.value / funnelData.leads.value) * 100).toFixed(1)}%
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>
+                  Deal Value
+                </div>
+                <div style={{ fontSize: '18px', fontWeight: '700', color: '#f8fafc' }}>
+                  {formatCurrency(funnelData.dealValue.value)}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -934,93 +1228,6 @@ function App() {
         })}
       </div>
 
-      {/* Insights Footer */}
-      <div style={{
-        marginTop: '24px',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-        gap: '16px'
-      }}>
-        <div style={{
-          background: '#1e293b',
-          borderRadius: '12px',
-          padding: '20px',
-          border: '1px solid #334155'
-        }}>
-          <div style={{ 
-            fontSize: '12px', 
-            color: '#64748b', 
-            marginBottom: '12px',
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px',
-            fontWeight: '600'
-          }}>
-            📊 Key Insight
-          </div>
-          <p style={{ 
-            fontSize: '14px', 
-            color: '#e2e8f0',
-            margin: 0,
-            lineHeight: '1.6'
-          }}>
-            <strong>Certta.ai</strong> shows explosive early growth (+{certtaData.keywordsTrend || 0}% keywords), 
-            but absolute traffic ({certtaData.organicTraffic || 0}/mo) remains limited. <strong>Caf.io</strong> still holds majority of organic 
-            equity but is declining {cafData.trafficTrend || 0}% monthly.
-          </p>
-        </div>
-        
-        <div style={{
-          background: '#1e293b',
-          borderRadius: '12px',
-          padding: '20px',
-          border: '1px solid #334155'
-        }}>
-          <div style={{ 
-            fontSize: '12px', 
-            color: '#64748b', 
-            marginBottom: '12px',
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px',
-            fontWeight: '600'
-          }}>
-            🎯 Competitive Gap
-          </div>
-          <p style={{ 
-            fontSize: '14px', 
-            color: '#e2e8f0',
-            margin: 0,
-            lineHeight: '1.6'
-          }}>
-            Market leaders have significantly more organic traffic than Certta. 
-            Priority: accelerate certta.ai authority build while managing caf.io transition.
-          </p>
-        </div>
-      </div>
-
-      {/* Legend */}
-      <div style={{
-        marginTop: '16px',
-        display: 'flex',
-        gap: '24px',
-        justifyContent: 'center',
-        fontSize: '11px',
-        color: '#64748b',
-        flexWrap: 'wrap'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ color: '#10b981' }}>↑</span> Growth &gt;10%
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ color: '#6ee7b7' }}>↑</span> Mild Growth
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ color: '#fbbf24' }}>↓</span> Mild Decline
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ color: '#ef4444' }}>↓</span> Decline &gt;10%
-        </div>
-      </div>
-
       {/* Footer */}
       <div style={{
         marginTop: '32px',
@@ -1028,7 +1235,7 @@ function App() {
         fontSize: '12px',
         color: '#475569'
       }}>
-        Built by AdRoq • Data source: Semrush • Last update: {lastUpdated}
+        Built by AdRoq • Data source: Semrush + HubSpot • Last update: {lastUpdated}
       </div>
     </div>
   );
