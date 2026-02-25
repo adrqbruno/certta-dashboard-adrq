@@ -515,237 +515,6 @@ function App() {
         </div>
       </div>
 
-      {/* ============================================ */}
-      {/* SMARKETING FUNNEL SECTION */}
-      {/* ============================================ */}
-      <div style={{
-        background: '#1e293b',
-        borderRadius: '16px',
-        padding: '24px',
-        marginBottom: '24px',
-        border: '1px solid #334155'
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '20px'
-        }}>
-          <div style={{ 
-            fontSize: '16px', 
-            fontWeight: '600',
-            color: '#f8fafc'
-          }}>
-            Smarketing Performance
-          </div>
-          <span style={{
-            background: '#06b6d420',
-            color: '#06b6d4',
-            padding: '4px 12px',
-            borderRadius: '12px',
-            fontSize: '11px',
-            fontWeight: '500'
-          }}>
-            {funnelData.period}
-          </span>
-        </div>
-
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '24px'
-        }}>
-          {/* Left side: KPIs Grid */}
-          <div>
-            {/* Row 1: Volume metrics */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '12px',
-              marginBottom: '12px'
-            }}>
-              <FunnelKpiCard 
-                label="Leads" 
-                value={formatNumber(funnelData.leads.value)} 
-                trend={funnelData.leads.trend}
-                color="#3b82f6"
-              />
-              <FunnelKpiCard 
-                label="MQL" 
-                value={formatNumber(funnelData.mql.value)} 
-                trend={funnelData.mql.trend}
-                color="#f97316"
-              />
-              <FunnelKpiCard 
-                label="SQL" 
-                value={formatNumber(funnelData.sql.value)} 
-                trend={funnelData.sql.trend}
-                color="#8b5cf6"
-              />
-            </div>
-
-            {/* Row 2: Conversion metrics */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '12px',
-              marginBottom: '12px'
-            }}>
-              <FunnelKpiCard 
-                label="Proposals" 
-                value={funnelData.proposals.value} 
-                trend={funnelData.proposals.trend}
-                color="#06b6d4"
-              />
-              <FunnelKpiCard 
-                label="Won Deals" 
-                value={funnelData.wonDeals.value} 
-                trend={funnelData.wonDeals.trend}
-                color="#10b981"
-              />
-              <FunnelKpiCard 
-                label="Win Rate %" 
-                value={`${funnelData.winRate.value}%`} 
-                trend={funnelData.winRate.trend}
-                color="#10b981"
-              />
-            </div>
-
-            {/* Row 3: Financial metrics */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '12px'
-            }}>
-              <FunnelKpiCard 
-                label="Ads Spend" 
-                value={formatCurrency(funnelData.adsSpend.value)} 
-                trend={funnelData.adsSpend.trend}
-              />
-              <FunnelKpiCard 
-                label="CAC" 
-                value={formatCurrency(funnelData.cac.value)} 
-                trend={funnelData.cac.trend}
-              />
-              <FunnelKpiCard 
-                label="ROAS" 
-                value={`${funnelData.roas.value}x`} 
-                trend={funnelData.roas.trend}
-                color={funnelData.roas.value >= 1.5 ? '#10b981' : '#f59e0b'}
-              />
-            </div>
-          </div>
-
-          {/* Right side: Funnel Visualization */}
-          <div style={{
-            background: '#0f172a',
-            borderRadius: '12px',
-            padding: '20px',
-            border: '1px solid #334155'
-          }}>
-            <div style={{
-              fontSize: '11px',
-              color: '#64748b',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-              marginBottom: '16px'
-            }}>
-              Sales Funnel
-            </div>
-
-            {/* Funnel bars */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {funnelStages.map((stage, idx) => {
-                const maxValue = funnelStages[0].value;
-                const percentage = (stage.value / maxValue) * 100;
-                const conversionRate = idx > 0 
-                  ? ((stage.value / funnelStages[idx - 1].value) * 100).toFixed(1)
-                  : 100;
-                
-                return (
-                  <div key={stage.name}>
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: '6px'
-                    }}>
-                      <span style={{ 
-                        fontSize: '12px', 
-                        color: '#94a3b8',
-                        fontWeight: '500'
-                      }}>
-                        {stage.name}
-                      </span>
-                      <span style={{ 
-                        fontSize: '14px', 
-                        color: '#f8fafc',
-                        fontWeight: '600'
-                      }}>
-                        {formatNumber(stage.value)}
-                      </span>
-                    </div>
-                    <div style={{
-                      position: 'relative',
-                      height: '28px',
-                      background: '#1e293b',
-                      borderRadius: '6px',
-                      overflow: 'hidden'
-                    }}>
-                      <div style={{
-                        width: `${percentage}%`,
-                        height: '100%',
-                        background: `linear-gradient(90deg, ${stage.color}, ${stage.color}cc)`,
-                        borderRadius: '6px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        paddingLeft: '10px',
-                        transition: 'width 0.5s ease'
-                      }}>
-                        <span style={{
-                          fontSize: '11px',
-                          fontWeight: '600',
-                          color: '#fff'
-                        }}>
-                          {conversionRate}%
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Summary stats */}
-            <div style={{
-              marginTop: '20px',
-              paddingTop: '16px',
-              borderTop: '1px solid #334155',
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '16px'
-            }}>
-              <div>
-                <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>
-                  Lead → Won
-                </div>
-                <div style={{ fontSize: '18px', fontWeight: '700', color: '#10b981' }}>
-                  {((funnelData.wonDeals.value / funnelData.leads.value) * 100).toFixed(1)}%
-                </div>
-              </div>
-              <div>
-                <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>
-                  Deal Value
-                </div>
-                <div style={{ fontSize: '18px', fontWeight: '700', color: '#f8fafc' }}>
-                  {formatCurrency(funnelData.dealValue.value)}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Spider Chart Section */}
       <div style={{
         background: '#1e293b',
@@ -1226,6 +995,246 @@ function App() {
             </div>
           );
         })}
+      </div>
+
+      {/* ============================================ */}
+      {/* SMARKETING FUNNEL SECTION - Results/Outcome */}
+      {/* ============================================ */}
+      <div style={{
+        background: '#1e293b',
+        borderRadius: '16px',
+        padding: '24px',
+        marginTop: '24px',
+        border: '1px solid #334155'
+      }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '20px'
+        }}>
+          <div>
+            <div style={{ 
+              fontSize: '16px', 
+              fontWeight: '600',
+              color: '#f8fafc',
+              marginBottom: '4px'
+            }}>
+              Smarketing Performance
+            </div>
+            <div style={{ 
+              fontSize: '12px', 
+              color: '#64748b'
+            }}>
+              Full-funnel results: from lead generation to closed revenue
+            </div>
+          </div>
+          <span style={{
+            background: '#06b6d420',
+            color: '#06b6d4',
+            padding: '4px 12px',
+            borderRadius: '12px',
+            fontSize: '11px',
+            fontWeight: '500'
+          }}>
+            {funnelData.period}
+          </span>
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '24px'
+        }}>
+          {/* Left side: KPIs Grid */}
+          <div>
+            {/* Row 1: Volume metrics */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '12px',
+              marginBottom: '12px'
+            }}>
+              <FunnelKpiCard 
+                label="Leads" 
+                value={formatNumber(funnelData.leads.value)} 
+                trend={funnelData.leads.trend}
+                color="#3b82f6"
+              />
+              <FunnelKpiCard 
+                label="MQL" 
+                value={formatNumber(funnelData.mql.value)} 
+                trend={funnelData.mql.trend}
+                color="#f97316"
+              />
+              <FunnelKpiCard 
+                label="SQL" 
+                value={formatNumber(funnelData.sql.value)} 
+                trend={funnelData.sql.trend}
+                color="#8b5cf6"
+              />
+            </div>
+
+            {/* Row 2: Conversion metrics */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '12px',
+              marginBottom: '12px'
+            }}>
+              <FunnelKpiCard 
+                label="Proposals" 
+                value={funnelData.proposals.value} 
+                trend={funnelData.proposals.trend}
+                color="#06b6d4"
+              />
+              <FunnelKpiCard 
+                label="Won Deals" 
+                value={funnelData.wonDeals.value} 
+                trend={funnelData.wonDeals.trend}
+                color="#10b981"
+              />
+              <FunnelKpiCard 
+                label="Win Rate %" 
+                value={`${funnelData.winRate.value}%`} 
+                trend={funnelData.winRate.trend}
+                color="#10b981"
+              />
+            </div>
+
+            {/* Row 3: Financial metrics */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '12px'
+            }}>
+              <FunnelKpiCard 
+                label="Ads Spend" 
+                value={formatCurrency(funnelData.adsSpend.value)} 
+                trend={funnelData.adsSpend.trend}
+              />
+              <FunnelKpiCard 
+                label="CAC" 
+                value={formatCurrency(funnelData.cac.value)} 
+                trend={funnelData.cac.trend}
+              />
+              <FunnelKpiCard 
+                label="ROAS" 
+                value={`${funnelData.roas.value}x`} 
+                trend={funnelData.roas.trend}
+                color={funnelData.roas.value >= 1.5 ? '#10b981' : '#f59e0b'}
+              />
+            </div>
+          </div>
+
+          {/* Right side: Funnel Visualization */}
+          <div style={{
+            background: '#0f172a',
+            borderRadius: '12px',
+            padding: '20px',
+            border: '1px solid #334155'
+          }}>
+            <div style={{
+              fontSize: '11px',
+              color: '#64748b',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              marginBottom: '16px'
+            }}>
+              Sales Funnel
+            </div>
+
+            {/* Funnel bars */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {funnelStages.map((stage, idx) => {
+                const maxValue = funnelStages[0].value;
+                const percentage = (stage.value / maxValue) * 100;
+                const conversionRate = idx > 0 
+                  ? ((stage.value / funnelStages[idx - 1].value) * 100).toFixed(1)
+                  : 100;
+                
+                return (
+                  <div key={stage.name}>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '6px'
+                    }}>
+                      <span style={{ 
+                        fontSize: '12px', 
+                        color: '#94a3b8',
+                        fontWeight: '500'
+                      }}>
+                        {stage.name}
+                      </span>
+                      <span style={{ 
+                        fontSize: '14px', 
+                        color: '#f8fafc',
+                        fontWeight: '600'
+                      }}>
+                        {formatNumber(stage.value)}
+                      </span>
+                    </div>
+                    <div style={{
+                      position: 'relative',
+                      height: '28px',
+                      background: '#1e293b',
+                      borderRadius: '6px',
+                      overflow: 'hidden'
+                    }}>
+                      <div style={{
+                        width: `${percentage}%`,
+                        height: '100%',
+                        background: `linear-gradient(90deg, ${stage.color}, ${stage.color}cc)`,
+                        borderRadius: '6px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        paddingLeft: '10px',
+                        transition: 'width 0.5s ease'
+                      }}>
+                        <span style={{
+                          fontSize: '11px',
+                          fontWeight: '600',
+                          color: '#fff'
+                        }}>
+                          {conversionRate}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Summary stats */}
+            <div style={{
+              marginTop: '20px',
+              paddingTop: '16px',
+              borderTop: '1px solid #334155',
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '16px'
+            }}>
+              <div>
+                <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>
+                  Lead → Won
+                </div>
+                <div style={{ fontSize: '18px', fontWeight: '700', color: '#10b981' }}>
+                  {((funnelData.wonDeals.value / funnelData.leads.value) * 100).toFixed(1)}%
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>
+                  Deal Value
+                </div>
+                <div style={{ fontSize: '18px', fontWeight: '700', color: '#f8fafc' }}>
+                  {formatCurrency(funnelData.dealValue.value)}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Footer */}
