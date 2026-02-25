@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 
 // ============================================
-// CONFIGURAÇÃO - ATUALIZE ESTAS URLs
+// CONFIGURAÇÃO - URLs DO GOOGLE SHEETS
 // ============================================
 const SHEETS_CONFIG = {
   competitorsUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSlkIr00Ua6EYb3DLBehpFqWvdXd0LSexCXHLaIfRLCOIpG5nm5vOlZ4hKZqWwLXg/pub?gid=1560647113&single=true&output=csv',
   configUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSlkIr00Ua6EYb3DLBehpFqWvdXd0LSexCXHLaIfRLCOIpG5nm5vOlZ4hKZqWwLXg/pub?gid=109836250&single=true&output=csv',
-  // Futura URL para dados do funnel (quando disponível)
-  funnelUrl: 'COLE_AQUI_A_URL_DA_ABA_FUNNEL',
   useFallback: true
 };
 
@@ -24,24 +22,70 @@ const FALLBACK_DATA = {
   ]
 };
 
-// Dados DUMMY do Funnel - Substituir por dados reais depois
+// Dados DUMMY do Funnel
 const FUNNEL_DATA = {
   period: "YTD 2026",
-  // KPIs principais
   leads: { value: 1869, trend: 12.5 },
   mql: { value: 1235, trend: 8.2 },
   sql: { value: 262, trend: 15.1 },
   proposals: { value: 75, trend: 5.6 },
   wonDeals: { value: 33, trend: 2.1 },
-  // Taxas
   winRate: { value: 29.3, trend: 1.4 },
-  // Financeiro
   adsSpend: { value: 416200, trend: -3.2 },
   cac: { value: 2500, trend: -5.0 },
   cpa: { value: 152.30, trend: 4.8 },
   dealValue: { value: 666700, trend: 8.5 },
   roas: { value: 1.6, trend: 15.0 }
 };
+
+// Dados DUMMY do GA4 por mês
+const GA4_MONTHLY_DATA = {
+  'Jan 2026': {
+    metrics: {
+      sessions: { value: 4200, trend: 8.5 },
+      pageViews: { value: 5100, trend: 6.2 },
+      activeUsers: { value: 3200, trend: 5.8 },
+      newUserPercent: { value: 112, trend: 2.3 }
+    },
+    dailyData: [
+      { date: '01', sessions: 1200, sessionsPrev: 1100 },
+      { date: '05', sessions: 1400, sessionsPrev: 1250 },
+      { date: '10', sessions: 1350, sessionsPrev: 1200 },
+      { date: '15', sessions: 1500, sessionsPrev: 1300 },
+      { date: '20', sessions: 1450, sessionsPrev: 1350 },
+      { date: '25', sessions: 1600, sessionsPrev: 1400 },
+      { date: '31', sessions: 1550, sessionsPrev: 1450 }
+    ]
+  },
+  'Fev 2026': {
+    metrics: {
+      sessions: { value: 5100, trend: -29.4 },
+      pageViews: { value: 6200, trend: -27.3 },
+      activeUsers: { value: 3975, trend: -27.1 },
+      newUserPercent: { value: 118, trend: -5.1 }
+    },
+    dailyData: [
+      { date: '01', sessions: 1600, sessionsPrev: 900 },
+      { date: '05', sessions: 1850, sessionsPrev: 950 },
+      { date: '10', sessions: 1400, sessionsPrev: 850 },
+      { date: '15', sessions: 800, sessionsPrev: 450 },
+      { date: '20', sessions: 650, sessionsPrev: 400 },
+      { date: '22', sessions: 950, sessionsPrev: 600 },
+      { date: '24', sessions: 500, sessionsPrev: 900 }
+    ]
+  },
+  'Mar 2026': {
+    metrics: {
+      sessions: { value: 0, trend: 0 },
+      pageViews: { value: 0, trend: 0 },
+      activeUsers: { value: 0, trend: 0 },
+      newUserPercent: { value: 0, trend: 0 }
+    },
+    dailyData: []
+  }
+};
+
+const AVAILABLE_MONTHS = ['Jan 2026', 'Fev 2026', 'Mar 2026'];
 
 // Parser de CSV
 function parseCSV(csvText) {
@@ -68,14 +112,183 @@ function parseCSV(csvText) {
   return data;
 }
 
+// Sparkline Chart Component
+const SparklineChart = ({ data, width = 500, height = 140 }) => {
+  if (!data || data.length === 0) {
+    return (
+      <div style={{ 
+        height, 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        color: '#64748b',
+        fontSize: '13px'
+      }}>
+        Dados não disponíveis para este período
+      </div>
+    );
+  }
+
+  const maxValue = Math.max(...data.map(d => Math.max(d.sessions, d.sessionsPrev)));
+  const minValue = 0;
+  const padding = { top: 20, right: 20, bottom: 30, left: 10 };
+  
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+  
+  const getX = (index) => padding.left + (index / (data.length - 1)) * chartWidth;
+  const getY = (value) => padding.top + chartHeight - ((value - minValue) / (maxValue - minValue)) * chartHeight;
+  
+  const createPath = (key) => {
+    return data.map((d, i) => {
+      const x = getX(i);
+      const y = getY(d[key]);
+      return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+    }).join(' ');
+  };
+
+  const createArea = (key) => {
+    const linePath = data.map((d, i) => {
+      const x = getX(i);
+      const y = getY(d[key]);
+      return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+    }).join(' ');
+    
+    const lastX = getX(data.length - 1);
+    const firstX = getX(0);
+    const bottomY = padding.top + chartHeight;
+    
+    return `${linePath} L ${lastX} ${bottomY} L ${firstX} ${bottomY} Z`;
+  };
+  
+  return (
+    <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet">
+      {/* Grid lines */}
+      {[0, 0.5, 1].map((ratio, i) => (
+        <line
+          key={i}
+          x1={padding.left}
+          y1={padding.top + chartHeight * (1 - ratio)}
+          x2={width - padding.right}
+          y2={padding.top + chartHeight * (1 - ratio)}
+          stroke="#334155"
+          strokeWidth="1"
+          strokeDasharray="4,4"
+        />
+      ))}
+      
+      {/* Previous period area */}
+      <path
+        d={createArea('sessionsPrev')}
+        fill="#64748b"
+        opacity="0.15"
+      />
+      
+      {/* Previous period line */}
+      <path
+        d={createPath('sessionsPrev')}
+        fill="none"
+        stroke="#64748b"
+        strokeWidth="2"
+        opacity="0.5"
+      />
+      
+      {/* Current period area */}
+      <path
+        d={createArea('sessions')}
+        fill="#3b82f6"
+        opacity="0.2"
+      />
+      
+      {/* Current period line */}
+      <path
+        d={createPath('sessions')}
+        fill="none"
+        stroke="#3b82f6"
+        strokeWidth="2.5"
+      />
+      
+      {/* Data points - current */}
+      {data.map((d, i) => (
+        <circle
+          key={`current-${i}`}
+          cx={getX(i)}
+          cy={getY(d.sessions)}
+          r="4"
+          fill="#3b82f6"
+        />
+      ))}
+      
+      {/* X-axis labels */}
+      {data.map((d, i) => (
+        <text
+          key={`label-${i}`}
+          x={getX(i)}
+          y={height - 8}
+          textAnchor="middle"
+          fill="#64748b"
+          fontSize="10"
+        >
+          {d.date}
+        </text>
+      ))}
+      
+      {/* Y-axis labels */}
+      <text x={padding.left + 5} y={padding.top + 5} fill="#64748b" fontSize="9">
+        {(maxValue / 1000).toFixed(1)}K
+      </text>
+      <text x={padding.left + 5} y={padding.top + chartHeight - 5} fill="#64748b" fontSize="9">
+        0
+      </text>
+    </svg>
+  );
+};
+
+// Month Selector Component
+const MonthSelector = ({ months, selected, onChange }) => {
+  return (
+    <div style={{
+      display: 'flex',
+      gap: '8px',
+      background: '#0f172a',
+      padding: '4px',
+      borderRadius: '10px',
+      border: '1px solid #334155'
+    }}>
+      {months.map(month => (
+        <button
+          key={month}
+          onClick={() => onChange(month)}
+          style={{
+            padding: '6px 14px',
+            borderRadius: '6px',
+            border: 'none',
+            fontSize: '12px',
+            fontWeight: '500',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease',
+            background: selected === month ? '#3b82f6' : 'transparent',
+            color: selected === month ? '#fff' : '#94a3b8'
+          }}
+        >
+          {month.split(' ')[0]}
+        </button>
+      ))}
+    </div>
+  );
+};
+
 function App() {
   const [hoveredRow, setHoveredRow] = useState(null);
   const [hoveredCompetitor, setHoveredCompetitor] = useState(null);
   const [competitors, setCompetitors] = useState(FALLBACK_DATA.competitors);
   const [lastUpdated, setLastUpdated] = useState(FALLBACK_DATA.lastUpdated);
   const [funnelData] = useState(FUNNEL_DATA);
+  const [selectedMonth, setSelectedMonth] = useState('Fev 2026');
   const [dataSource, setDataSource] = useState('fallback');
   const [loading, setLoading] = useState(true);
+
+  const ga4Data = GA4_MONTHLY_DATA[selectedMonth];
 
   useEffect(() => {
     async function fetchData() {
@@ -119,7 +332,6 @@ function App() {
   const certtaData = competitors.find(c => c.domain === 'certta.ai') || {};
   const cafData = competitors.find(c => c.domain === 'caf.io') || {};
   
-  // Combined Certta metrics
   const certtaCombined = {
     organicKeywords: (certtaData.organicKeywords || 0) + (cafData.organicKeywords || 0),
     organicTraffic: (certtaData.organicTraffic || 0) + (cafData.organicTraffic || 0),
@@ -235,7 +447,6 @@ function App() {
   const migrationProgress = certtaData && cafData ? 
     Math.round(((certtaData.organicTraffic || 0) / ((certtaData.organicTraffic || 0) + (cafData.organicTraffic || 1))) * 100) : 0;
 
-  // Funnel conversion rates
   const funnelStages = [
     { name: 'Leads', value: funnelData.leads.value, color: '#3b82f6' },
     { name: 'MQL', value: funnelData.mql.value, color: '#f97316' },
@@ -294,7 +505,49 @@ function App() {
     </div>
   );
 
-  // Funnel KPI Card - Smaller version
+  // GA4 KPI Card
+  const GA4KpiCard = ({ label, value, trend, trendLabel }) => (
+    <div style={{
+      background: '#0f172a',
+      borderRadius: '10px',
+      padding: '16px',
+      border: '1px solid #334155'
+    }}>
+      <div style={{
+        fontSize: '11px',
+        color: '#64748b',
+        textTransform: 'uppercase',
+        letterSpacing: '0.5px',
+        marginBottom: '8px'
+      }}>
+        {label}
+      </div>
+      <div style={{
+        fontSize: '28px',
+        fontWeight: '700',
+        color: '#f8fafc',
+        marginBottom: '6px'
+      }}>
+        {value}
+      </div>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px',
+        fontSize: '12px'
+      }}>
+        <span style={{
+          color: getTrendColor(trend),
+          fontWeight: '600'
+        }}>
+          {getTrendIcon(trend)} {Math.abs(trend).toFixed(1)}%
+        </span>
+        <span style={{ color: '#64748b' }}>{trendLabel}</span>
+      </div>
+    </div>
+  );
+
+  // Funnel KPI Card
   const FunnelKpiCard = ({ label, value, trend, color }) => (
     <div style={{
       background: '#0f172a',
@@ -408,6 +661,125 @@ function App() {
         }}>
           Smarketing & SEO Performance Dashboard • Updated: {lastUpdated}
         </p>
+      </div>
+
+      {/* ============================================ */}
+      {/* GA4 WEBSITE ANALYTICS SECTION */}
+      {/* ============================================ */}
+      <div style={{
+        background: '#1e293b',
+        borderRadius: '16px',
+        padding: '24px',
+        marginBottom: '24px',
+        border: '1px solid #334155'
+      }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '20px',
+          flexWrap: 'wrap',
+          gap: '12px'
+        }}>
+          <div>
+            <div style={{ 
+              fontSize: '16px', 
+              fontWeight: '600',
+              color: '#f8fafc',
+              marginBottom: '4px'
+            }}>
+              Website Analytics
+            </div>
+            <div style={{ 
+              fontSize: '12px', 
+              color: '#64748b'
+            }}>
+              Google Analytics 4 • certta.ai
+            </div>
+          </div>
+          <MonthSelector 
+            months={AVAILABLE_MONTHS} 
+            selected={selectedMonth} 
+            onChange={setSelectedMonth} 
+          />
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1.2fr',
+          gap: '24px'
+        }}>
+          {/* Left side: KPIs */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '12px'
+          }}>
+            <GA4KpiCard 
+              label="Sessions" 
+              value={formatNumber(ga4Data.metrics.sessions.value)} 
+              trend={ga4Data.metrics.sessions.trend}
+              trendLabel="vs. mês anterior"
+            />
+            <GA4KpiCard 
+              label="Page Views" 
+              value={formatNumber(ga4Data.metrics.pageViews.value)} 
+              trend={ga4Data.metrics.pageViews.trend}
+              trendLabel="vs. mês anterior"
+            />
+            <GA4KpiCard 
+              label="Active Users" 
+              value={formatNumber(ga4Data.metrics.activeUsers.value)} 
+              trend={ga4Data.metrics.activeUsers.trend}
+              trendLabel="vs. mês anterior"
+            />
+            <GA4KpiCard 
+              label="New Users %" 
+              value={`${ga4Data.metrics.newUserPercent.value}%`} 
+              trend={ga4Data.metrics.newUserPercent.trend}
+              trendLabel="vs. mês anterior"
+            />
+          </div>
+
+          {/* Right side: Trend Chart */}
+          <div style={{
+            background: '#0f172a',
+            borderRadius: '12px',
+            padding: '16px',
+            border: '1px solid #334155'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '12px'
+            }}>
+              <div style={{
+                fontSize: '11px',
+                color: '#64748b',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}>
+                Sessions Trend • {selectedMonth}
+              </div>
+              <div style={{
+                display: 'flex',
+                gap: '16px',
+                fontSize: '11px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ width: '12px', height: '3px', background: '#3b82f6', borderRadius: '2px' }} />
+                  <span style={{ color: '#94a3b8' }}>Current</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ width: '12px', height: '3px', background: '#64748b', borderRadius: '2px' }} />
+                  <span style={{ color: '#64748b' }}>Previous</span>
+                </div>
+              </div>
+            </div>
+            <SparklineChart data={ga4Data.dailyData} width={500} height={140} />
+          </div>
+        </div>
       </div>
 
       {/* Migration Alert Card */}
@@ -836,7 +1208,6 @@ function App() {
                 alignItems: 'center'
               }}
             >
-              {/* Domain */}
               <div>
                 <div style={{ 
                   fontWeight: '600',
@@ -852,12 +1223,7 @@ function App() {
                   gap: '8px',
                   flexWrap: 'wrap'
                 }}>
-                  <span style={{ 
-                    fontSize: '12px', 
-                    color: '#64748b' 
-                  }}>
-                    {company.domain}
-                  </span>
+                  <span style={{ fontSize: '12px', color: '#64748b' }}>{company.domain}</span>
                   <span style={{
                     background: tierStyle.bg,
                     color: tierStyle.color,
@@ -871,93 +1237,50 @@ function App() {
                 </div>
               </div>
 
-              {/* Keywords */}
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontWeight: '600', color: '#f8fafc' }}>
-                  {formatNumber(company.organicKeywords)}
-                </div>
-                <div style={{ 
-                  fontSize: '12px', 
-                  color: getTrendColor(company.keywordsTrend),
-                  fontWeight: '500'
-                }}>
+                <div style={{ fontWeight: '600', color: '#f8fafc' }}>{formatNumber(company.organicKeywords)}</div>
+                <div style={{ fontSize: '12px', color: getTrendColor(company.keywordsTrend), fontWeight: '500' }}>
                   {getTrendIcon(company.keywordsTrend)} {Math.abs(company.keywordsTrend).toFixed(1)}%
                 </div>
               </div>
 
-              {/* Organic Traffic */}
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontWeight: '600', color: '#f8fafc' }}>
-                  {formatNumber(company.organicTraffic)}
-                </div>
-                <div style={{ 
-                  fontSize: '12px', 
-                  color: getTrendColor(company.trafficTrend),
-                  fontWeight: '500'
-                }}>
+                <div style={{ fontWeight: '600', color: '#f8fafc' }}>{formatNumber(company.organicTraffic)}</div>
+                <div style={{ fontSize: '12px', color: getTrendColor(company.trafficTrend), fontWeight: '500' }}>
                   {getTrendIcon(company.trafficTrend)} {Math.abs(company.trafficTrend).toFixed(1)}%
                 </div>
               </div>
 
-              {/* Paid Keywords */}
               <div style={{ textAlign: 'right' }}>
-                <div style={{ 
-                  fontWeight: '600', 
-                  color: company.paidKeywords === 0 ? '#475569' : '#f8fafc' 
-                }}>
+                <div style={{ fontWeight: '600', color: company.paidKeywords === 0 ? '#475569' : '#f8fafc' }}>
                   {company.paidKeywords === 0 ? '—' : formatNumber(company.paidKeywords)}
                 </div>
                 {company.paidKeywords > 0 && (
-                  <div style={{ 
-                    fontSize: '12px', 
-                    color: getTrendColor(company.paidTrend),
-                    fontWeight: '500'
-                  }}>
+                  <div style={{ fontSize: '12px', color: getTrendColor(company.paidTrend), fontWeight: '500' }}>
                     {getTrendIcon(company.paidTrend)} {Math.abs(company.paidTrend).toFixed(0)}%
                   </div>
                 )}
               </div>
 
-              {/* Paid Traffic */}
               <div style={{ textAlign: 'right' }}>
-                <div style={{ 
-                  fontWeight: '600', 
-                  color: company.paidTraffic === 0 ? '#475569' : '#f8fafc' 
-                }}>
+                <div style={{ fontWeight: '600', color: company.paidTraffic === 0 ? '#475569' : '#f8fafc' }}>
                   {company.paidTraffic === 0 ? '—' : formatNumber(company.paidTraffic)}
                 </div>
                 {company.paidTraffic > 0 && (
-                  <div style={{ 
-                    fontSize: '12px', 
-                    color: getTrendColor(company.paidTrafficTrend),
-                    fontWeight: '500'
-                  }}>
+                  <div style={{ fontSize: '12px', color: getTrendColor(company.paidTrafficTrend), fontWeight: '500' }}>
                     {getTrendIcon(company.paidTrafficTrend)} {Math.abs(company.paidTrafficTrend).toFixed(0)}%
                   </div>
                 )}
               </div>
 
-              {/* Ref Domains */}
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontWeight: '600', color: '#f8fafc' }}>
-                  {formatNumber(company.refDomains)}
-                </div>
-                <div style={{ 
-                  fontSize: '12px', 
-                  color: getTrendColor(company.refTrend),
-                  fontWeight: '500'
-                }}>
+                <div style={{ fontWeight: '600', color: '#f8fafc' }}>{formatNumber(company.refDomains)}</div>
+                <div style={{ fontSize: '12px', color: getTrendColor(company.refTrend), fontWeight: '500' }}>
                   {getTrendIcon(company.refTrend)} {Math.abs(company.refTrend) > 100 ? '>100' : Math.abs(company.refTrend).toFixed(1)}%
                 </div>
               </div>
 
-              {/* Authority Score */}
-              <div style={{ 
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '4px'
-              }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
                 <div style={{
                   width: '48px',
                   height: '48px',
@@ -998,7 +1321,7 @@ function App() {
       </div>
 
       {/* ============================================ */}
-      {/* SMARKETING FUNNEL SECTION - Results/Outcome */}
+      {/* SMARKETING FUNNEL SECTION */}
       {/* ============================================ */}
       <div style={{
         background: '#1e293b',
@@ -1048,82 +1371,36 @@ function App() {
         }}>
           {/* Left side: KPIs Grid */}
           <div>
-            {/* Row 1: Volume metrics */}
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(3, 1fr)',
               gap: '12px',
               marginBottom: '12px'
             }}>
-              <FunnelKpiCard 
-                label="Leads" 
-                value={formatNumber(funnelData.leads.value)} 
-                trend={funnelData.leads.trend}
-                color="#3b82f6"
-              />
-              <FunnelKpiCard 
-                label="MQL" 
-                value={formatNumber(funnelData.mql.value)} 
-                trend={funnelData.mql.trend}
-                color="#f97316"
-              />
-              <FunnelKpiCard 
-                label="SQL" 
-                value={formatNumber(funnelData.sql.value)} 
-                trend={funnelData.sql.trend}
-                color="#8b5cf6"
-              />
+              <FunnelKpiCard label="Leads" value={formatNumber(funnelData.leads.value)} trend={funnelData.leads.trend} color="#3b82f6" />
+              <FunnelKpiCard label="MQL" value={formatNumber(funnelData.mql.value)} trend={funnelData.mql.trend} color="#f97316" />
+              <FunnelKpiCard label="SQL" value={formatNumber(funnelData.sql.value)} trend={funnelData.sql.trend} color="#8b5cf6" />
             </div>
 
-            {/* Row 2: Conversion metrics */}
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(3, 1fr)',
               gap: '12px',
               marginBottom: '12px'
             }}>
-              <FunnelKpiCard 
-                label="Proposals" 
-                value={funnelData.proposals.value} 
-                trend={funnelData.proposals.trend}
-                color="#06b6d4"
-              />
-              <FunnelKpiCard 
-                label="Won Deals" 
-                value={funnelData.wonDeals.value} 
-                trend={funnelData.wonDeals.trend}
-                color="#10b981"
-              />
-              <FunnelKpiCard 
-                label="Win Rate %" 
-                value={`${funnelData.winRate.value}%`} 
-                trend={funnelData.winRate.trend}
-                color="#10b981"
-              />
+              <FunnelKpiCard label="Proposals" value={funnelData.proposals.value} trend={funnelData.proposals.trend} color="#06b6d4" />
+              <FunnelKpiCard label="Won Deals" value={funnelData.wonDeals.value} trend={funnelData.wonDeals.trend} color="#10b981" />
+              <FunnelKpiCard label="Win Rate %" value={`${funnelData.winRate.value}%`} trend={funnelData.winRate.trend} color="#10b981" />
             </div>
 
-            {/* Row 3: Financial metrics */}
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(3, 1fr)',
               gap: '12px'
             }}>
-              <FunnelKpiCard 
-                label="Ads Spend" 
-                value={formatCurrency(funnelData.adsSpend.value)} 
-                trend={funnelData.adsSpend.trend}
-              />
-              <FunnelKpiCard 
-                label="CAC" 
-                value={formatCurrency(funnelData.cac.value)} 
-                trend={funnelData.cac.trend}
-              />
-              <FunnelKpiCard 
-                label="ROAS" 
-                value={`${funnelData.roas.value}x`} 
-                trend={funnelData.roas.trend}
-                color={funnelData.roas.value >= 1.5 ? '#10b981' : '#f59e0b'}
-              />
+              <FunnelKpiCard label="Ads Spend" value={formatCurrency(funnelData.adsSpend.value)} trend={funnelData.adsSpend.trend} />
+              <FunnelKpiCard label="CAC" value={formatCurrency(funnelData.cac.value)} trend={funnelData.cac.trend} />
+              <FunnelKpiCard label="ROAS" value={`${funnelData.roas.value}x`} trend={funnelData.roas.trend} color={funnelData.roas.value >= 1.5 ? '#10b981' : '#f59e0b'} />
             </div>
           </div>
 
@@ -1144,7 +1421,6 @@ function App() {
               Sales Funnel
             </div>
 
-            {/* Funnel bars */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {funnelStages.map((stage, idx) => {
                 const maxValue = funnelStages[0].value;
@@ -1161,20 +1437,8 @@ function App() {
                       alignItems: 'center',
                       marginBottom: '6px'
                     }}>
-                      <span style={{ 
-                        fontSize: '12px', 
-                        color: '#94a3b8',
-                        fontWeight: '500'
-                      }}>
-                        {stage.name}
-                      </span>
-                      <span style={{ 
-                        fontSize: '14px', 
-                        color: '#f8fafc',
-                        fontWeight: '600'
-                      }}>
-                        {formatNumber(stage.value)}
-                      </span>
+                      <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '500' }}>{stage.name}</span>
+                      <span style={{ fontSize: '14px', color: '#f8fafc', fontWeight: '600' }}>{formatNumber(stage.value)}</span>
                     </div>
                     <div style={{
                       position: 'relative',
@@ -1193,13 +1457,7 @@ function App() {
                         paddingLeft: '10px',
                         transition: 'width 0.5s ease'
                       }}>
-                        <span style={{
-                          fontSize: '11px',
-                          fontWeight: '600',
-                          color: '#fff'
-                        }}>
-                          {conversionRate}%
-                        </span>
+                        <span style={{ fontSize: '11px', fontWeight: '600', color: '#fff' }}>{conversionRate}%</span>
                       </div>
                     </div>
                   </div>
@@ -1207,7 +1465,6 @@ function App() {
               })}
             </div>
 
-            {/* Summary stats */}
             <div style={{
               marginTop: '20px',
               paddingTop: '16px',
@@ -1217,20 +1474,14 @@ function App() {
               gap: '16px'
             }}>
               <div>
-                <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>
-                  Lead → Won
-                </div>
+                <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>Lead → Won</div>
                 <div style={{ fontSize: '18px', fontWeight: '700', color: '#10b981' }}>
                   {((funnelData.wonDeals.value / funnelData.leads.value) * 100).toFixed(1)}%
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>
-                  Deal Value
-                </div>
-                <div style={{ fontSize: '18px', fontWeight: '700', color: '#f8fafc' }}>
-                  {formatCurrency(funnelData.dealValue.value)}
-                </div>
+                <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>Deal Value</div>
+                <div style={{ fontSize: '18px', fontWeight: '700', color: '#f8fafc' }}>{formatCurrency(funnelData.dealValue.value)}</div>
               </div>
             </div>
           </div>
@@ -1244,7 +1495,7 @@ function App() {
         fontSize: '12px',
         color: '#475569'
       }}>
-        Built by AdRoq • Data source: Semrush + HubSpot • Last update: {lastUpdated}
+        Built by AdRoq • Data source: GA4 + Semrush + HubSpot • Last update: {lastUpdated}
       </div>
     </div>
   );
