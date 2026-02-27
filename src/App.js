@@ -4,9 +4,14 @@ import React, { useState, useEffect } from 'react';
 // CONFIGURAÇÃO - URLs DO GOOGLE SHEETS
 // ============================================
 const SHEETS_CONFIG = {
+  // SEO Competitors
   competitorsUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSlkIr00Ua6EYb3DLBehpFqWvdXd0LSexCXHLaIfRLCOIpG5nm5vOlZ4hKZqWwLXg/pub?gid=1560647113&single=true&output=csv',
   configUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSlkIr00Ua6EYb3DLBehpFqWvdXd0LSexCXHLaIfRLCOIpG5nm5vOlZ4hKZqWwLXg/pub?gid=109836250&single=true&output=csv',
-  useFallback: true
+  
+  // Smarketing KPIs (CRM Data)
+  smarketingUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSIMqy3JIcjK5fi9BkPrTzskfgQs9BrZAwIk1UFZ4IBbqoFXYIOXhWSokH4JzUORg/pub?gid=1987761827&single=true&output=csv',
+  
+  useFallback: false // Agora vamos tentar carregar dos Sheets primeiro
 };
 
 // Dados de fallback - Competitors
@@ -93,7 +98,7 @@ const GA4_MONTHLY_DATA = {
 
 const AVAILABLE_MONTHS = ['Jan 2026', 'Fev 2026', 'Mar 2026'];
 
-// Parser de CSV
+// Parser de CSV genérico
 function parseCSV(csvText) {
   const lines = csvText.trim().split('\n');
   const headers = lines[0].split(',').map(h => h.trim());
@@ -116,6 +121,109 @@ function parseCSV(csvText) {
     data.push(row);
   }
   return data;
+}
+
+// Parser específico para Smarketing KPIs
+function parseSmarketingCSV(csvText) {
+  const lines = csvText.trim().split('\n');
+  const data = {};
+  
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    // Ignora linhas de seção (começam com #)
+    if (line.startsWith('#') || line.startsWith('"#')) continue;
+    
+    const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+    const metric = values[0];
+    const value = values[1];
+    const trend = values[2];
+    const period = values[3];
+    
+    if (!metric || metric.startsWith('#')) continue;
+    
+    // Converte valores numéricos
+    let parsedValue = value;
+    let parsedTrend = parseFloat(trend) || 0;
+    
+    // Detecta tipo de valor
+    if (!isNaN(parseFloat(value))) {
+      parsedValue = parseFloat(value);
+    }
+    
+    data[metric] = {
+      value: parsedValue,
+      trend: parsedTrend,
+      period: period || ''
+    };
+  }
+  
+  return data;
+}
+
+// Converte dados do Sheets para formato do FUNNEL_DATA
+function convertSmarketingToFunnelData(sheetsData) {
+  return {
+    period: sheetsData.period?.value || "YTD 2026",
+    // Score Cards
+    totalRevenue: { 
+      value: parseFloat(sheetsData.totalRevenue?.value) || 666700, 
+      trend: sheetsData.totalRevenue?.trend || 0 
+    },
+    ltv: { 
+      value: parseFloat(sheetsData.ltv?.value) || 45000, 
+      trend: sheetsData.ltv?.trend || 0 
+    },
+    arr: { 
+      value: parseFloat(sheetsData.arr?.value) || 1200000, 
+      trend: sheetsData.arr?.trend || 0 
+    },
+    // Funil
+    leads: { 
+      value: parseFloat(sheetsData.leads?.value) || 0, 
+      trend: sheetsData.leads?.trend || 0 
+    },
+    mql: { 
+      value: parseFloat(sheetsData.mql?.value) || 0, 
+      trend: sheetsData.mql?.trend || 0 
+    },
+    sql: { 
+      value: parseFloat(sheetsData.sql?.value) || 0, 
+      trend: sheetsData.sql?.trend || 0 
+    },
+    proposals: { 
+      value: parseFloat(sheetsData.proposals?.value) || 0, 
+      trend: sheetsData.proposals?.trend || 0 
+    },
+    wonDeals: { 
+      value: parseFloat(sheetsData.wonDeals?.value) || 0, 
+      trend: sheetsData.wonDeals?.trend || 0 
+    },
+    winRate: { 
+      value: parseFloat(sheetsData.winRate?.value) || 0, 
+      trend: sheetsData.winRate?.trend || 0 
+    },
+    // Financeiro
+    adsSpend: { 
+      value: parseFloat(sheetsData.adsSpend?.value) || 0, 
+      trend: sheetsData.adsSpend?.trend || 0 
+    },
+    cac: { 
+      value: parseFloat(sheetsData.cac?.value) || 0, 
+      trend: sheetsData.cac?.trend || 0 
+    },
+    cpa: { 
+      value: parseFloat(sheetsData.cpa?.value) || 0, 
+      trend: sheetsData.cpa?.trend || 0 
+    },
+    dealValue: { 
+      value: parseFloat(sheetsData.totalRevenue?.value) || 666700, 
+      trend: sheetsData.totalRevenue?.trend || 0 
+    },
+    roas: { 
+      value: parseFloat(sheetsData.roas?.value) || 0, 
+      trend: sheetsData.roas?.trend || 0 
+    }
+  };
 }
 
 // Sparkline Chart Component
@@ -289,31 +397,37 @@ function App() {
   const [hoveredCompetitor, setHoveredCompetitor] = useState(null);
   const [competitors, setCompetitors] = useState(FALLBACK_DATA.competitors);
   const [lastUpdated, setLastUpdated] = useState(FALLBACK_DATA.lastUpdated);
-  const [funnelData] = useState(FUNNEL_DATA);
+  const [funnelData, setFunnelData] = useState(FUNNEL_DATA);
   const [selectedMonth, setSelectedMonth] = useState('Fev 2026');
   const [dataSource, setDataSource] = useState('fallback');
+  const [smarketingSource, setSmarketingSource] = useState('fallback');
   const [loading, setLoading] = useState(true);
 
   const ga4Data = GA4_MONTHLY_DATA[selectedMonth];
 
   useEffect(() => {
     async function fetchData() {
-      if (SHEETS_CONFIG.competitorsUrl.includes('COLE_AQUI')) {
-        setDataSource('fallback');
-        setLoading(false);
-        return;
+      let loadedSomething = false;
+
+      // Carregar dados dos Competitors (SEO)
+      try {
+        if (!SHEETS_CONFIG.competitorsUrl.includes('COLE_AQUI')) {
+          const competitorsResponse = await fetch(SHEETS_CONFIG.competitorsUrl);
+          const competitorsCSV = await competitorsResponse.text();
+          const competitorsData = parseCSV(competitorsCSV);
+          
+          if (competitorsData.length > 0) {
+            setCompetitors(competitorsData);
+            setDataSource('sheets');
+            loadedSomething = true;
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar competitors:', error);
       }
 
+      // Carregar config
       try {
-        const competitorsResponse = await fetch(SHEETS_CONFIG.competitorsUrl);
-        const competitorsCSV = await competitorsResponse.text();
-        const competitorsData = parseCSV(competitorsCSV);
-        
-        if (competitorsData.length > 0) {
-          setCompetitors(competitorsData);
-          setDataSource('sheets');
-        }
-
         if (!SHEETS_CONFIG.configUrl.includes('COLE_AQUI')) {
           const configResponse = await fetch(SHEETS_CONFIG.configUrl);
           const configCSV = await configResponse.text();
@@ -324,7 +438,30 @@ function App() {
           }
         }
       } catch (error) {
-        console.error('Erro ao carregar dados do Google Sheets:', error);
+        console.error('Erro ao carregar config:', error);
+      }
+
+      // Carregar dados do Smarketing (CRM)
+      try {
+        if (SHEETS_CONFIG.smarketingUrl && !SHEETS_CONFIG.smarketingUrl.includes('COLE_AQUI')) {
+          const smarketingResponse = await fetch(SHEETS_CONFIG.smarketingUrl);
+          const smarketingCSV = await smarketingResponse.text();
+          const smarketingRaw = parseSmarketingCSV(smarketingCSV);
+          
+          if (Object.keys(smarketingRaw).length > 0) {
+            const convertedData = convertSmarketingToFunnelData(smarketingRaw);
+            setFunnelData(convertedData);
+            setSmarketingSource('sheets');
+            loadedSomething = true;
+            console.log('✅ Smarketing data loaded from Sheets:', convertedData);
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar smarketing:', error);
+        setSmarketingSource('fallback');
+      }
+
+      if (!loadedSomething) {
         setDataSource('fallback');
       }
       
@@ -1358,16 +1495,28 @@ function App() {
               Full-funnel results: from lead generation to closed revenue
             </div>
           </div>
-          <span style={{
-            background: '#06b6d420',
-            color: '#06b6d4',
-            padding: '4px 12px',
-            borderRadius: '12px',
-            fontSize: '11px',
-            fontWeight: '500'
-          }}>
-            {funnelData.period}
-          </span>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <span style={{
+              background: smarketingSource === 'sheets' ? '#10b98120' : '#f59e0b20',
+              color: smarketingSource === 'sheets' ? '#10b981' : '#f59e0b',
+              padding: '4px 10px',
+              borderRadius: '12px',
+              fontSize: '10px',
+              fontWeight: '500'
+            }}>
+              {smarketingSource === 'sheets' ? '🔗 Live Data' : '📁 Demo'}
+            </span>
+            <span style={{
+              background: '#06b6d420',
+              color: '#06b6d4',
+              padding: '4px 12px',
+              borderRadius: '12px',
+              fontSize: '11px',
+              fontWeight: '500'
+            }}>
+              {funnelData.period}
+            </span>
+          </div>
         </div>
 
         {/* Score Cards - Top Metrics */}
