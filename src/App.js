@@ -25,12 +25,18 @@ const FALLBACK_DATA = {
 // Dados DUMMY do Funnel
 const FUNNEL_DATA = {
   period: "YTD 2026",
+  // Score Cards - Destaque
+  totalRevenue: { value: 666700, trend: 8.5 },
+  ltv: { value: 45000, trend: 12.3 },
+  arr: { value: 1200000, trend: 18.5 },
+  // Funil
   leads: { value: 1869, trend: 12.5 },
   mql: { value: 1235, trend: 8.2 },
   sql: { value: 262, trend: 15.1 },
   proposals: { value: 75, trend: 5.6 },
   wonDeals: { value: 33, trend: 2.1 },
   winRate: { value: 29.3, trend: 1.4 },
+  // Financeiro
   adsSpend: { value: 416200, trend: -3.2 },
   cac: { value: 2500, trend: -5.0 },
   cpa: { value: 152.30, trend: 4.8 },
@@ -1362,6 +1368,158 @@ function App() {
           }}>
             {funnelData.period}
           </span>
+        </div>
+
+        {/* Score Cards - Top Metrics */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '16px',
+          marginBottom: '24px'
+        }}>
+          {/* Total Revenue */}
+          <div style={{
+            background: 'linear-gradient(135deg, #065f46 0%, #047857 100%)',
+            borderRadius: '12px',
+            padding: '20px',
+            border: '1px solid #10b98140'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              marginBottom: '12px'
+            }}>
+              <span style={{ fontSize: '20px' }}>💰</span>
+              <span style={{
+                fontSize: '11px',
+                color: '#a7f3d0',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                fontWeight: '500'
+              }}>
+                Total Revenue
+              </span>
+            </div>
+            <div style={{
+              fontSize: '32px',
+              fontWeight: '700',
+              color: '#fff',
+              marginBottom: '8px'
+            }}>
+              {formatCurrency(funnelData.totalRevenue.value)}
+            </div>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '13px'
+            }}>
+              <span style={{
+                color: '#6ee7b7',
+                fontWeight: '600'
+              }}>
+                {getTrendIcon(funnelData.totalRevenue.trend)} {Math.abs(funnelData.totalRevenue.trend).toFixed(1)}%
+              </span>
+              <span style={{ color: '#a7f3d0' }}>vs. período anterior</span>
+            </div>
+          </div>
+
+          {/* LTV */}
+          <div style={{
+            background: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)',
+            borderRadius: '12px',
+            padding: '20px',
+            border: '1px solid #3b82f640'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              marginBottom: '12px'
+            }}>
+              <span style={{ fontSize: '20px' }}>👤</span>
+              <span style={{
+                fontSize: '11px',
+                color: '#bfdbfe',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                fontWeight: '500'
+              }}>
+                Lifetime Value
+              </span>
+            </div>
+            <div style={{
+              fontSize: '32px',
+              fontWeight: '700',
+              color: '#fff',
+              marginBottom: '8px'
+            }}>
+              {formatCurrency(funnelData.ltv.value)}
+            </div>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '13px'
+            }}>
+              <span style={{
+                color: '#93c5fd',
+                fontWeight: '600'
+              }}>
+                {getTrendIcon(funnelData.ltv.trend)} {Math.abs(funnelData.ltv.trend).toFixed(1)}%
+              </span>
+              <span style={{ color: '#bfdbfe' }}>vs. período anterior</span>
+            </div>
+          </div>
+
+          {/* ARR */}
+          <div style={{
+            background: 'linear-gradient(135deg, #581c87 0%, #7c3aed 100%)',
+            borderRadius: '12px',
+            padding: '20px',
+            border: '1px solid #8b5cf640'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              marginBottom: '12px'
+            }}>
+              <span style={{ fontSize: '20px' }}>📈</span>
+              <span style={{
+                fontSize: '11px',
+                color: '#e9d5ff',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                fontWeight: '500'
+              }}>
+                ARR
+              </span>
+            </div>
+            <div style={{
+              fontSize: '32px',
+              fontWeight: '700',
+              color: '#fff',
+              marginBottom: '8px'
+            }}>
+              {formatCurrency(funnelData.arr.value)}
+            </div>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '13px'
+            }}>
+              <span style={{
+                color: '#c4b5fd',
+                fontWeight: '600'
+              }}>
+                {getTrendIcon(funnelData.arr.trend)} {Math.abs(funnelData.arr.trend).toFixed(1)}%
+              </span>
+              <span style={{ color: '#e9d5ff' }}>vs. período anterior</span>
+            </div>
+          </div>
         </div>
 
         <div style={{
