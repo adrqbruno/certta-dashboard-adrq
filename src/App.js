@@ -11,26 +11,29 @@ const SHEETS_CONFIG = {
   // Smarketing KPIs (CRM Data)
   smarketingUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSIMqy3JIcjK5fi9BkPrTzskfgQs9BrZAwIk1UFZ4IBbqoFXYIOXhWSokH4JzUORg/pub?gid=1987761827&single=true&output=csv',
   
-  useFallback: false // Agora vamos tentar carregar dos Sheets primeiro
+  // Executive Brief
+  executiveBriefUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSlkIr00Ua6EYb3DLBehpFqWvdXd0LSexCXHLaIfRLCOIpG5nm5vOlZ4hKZqWwLXg/pub?gid=1672972077&single=true&output=csv',
+  
+  useFallback: false
 };
 
 // Dados de fallback - Competitors
 const FALLBACK_DATA = {
-  lastUpdated: "Fev 2026",
+  lastUpdated: "Mar 2026",
   competitors: [
-    { domain: 'unico.io', name: 'Unico', tier: 'leader', organicKeywords: 4500, keywordsTrend: 12.91, organicTraffic: 39300, trafficTrend: -3.45, paidKeywords: 0, paidTrend: 0, paidTraffic: 0, paidTrafficTrend: 0, refDomains: 2900, refTrend: -3.5, authorityScore: 36, authorityChange: -3, isOwn: false, highlight: false },
-    { domain: 'clear.sale', name: 'ClearSale', tier: 'leader', organicKeywords: 3800, keywordsTrend: 6.67, organicTraffic: 19700, trafficTrend: 1.77, paidKeywords: 5, paidTrend: 25, paidTraffic: 994, paidTrafficTrend: 26.14, refDomains: 3400, refTrend: -4.66, authorityScore: 42, authorityChange: -1, isOwn: false, highlight: false },
-    { domain: 'idwall.co', name: 'idwall', tier: 'competitor', organicKeywords: 2600, keywordsTrend: -0.83, organicTraffic: 12300, trafficTrend: -4.67, paidKeywords: 0, paidTrend: 0, paidTraffic: 0, paidTrafficTrend: 0, refDomains: 1600, refTrend: -3.58, authorityScore: 34, authorityChange: 0, isOwn: false, highlight: false },
-    { domain: 'jumio.com', name: 'Jumio', tier: 'global', organicKeywords: 170, keywordsTrend: -3.41, organicTraffic: 517, trafficTrend: 1.77, paidKeywords: 1, paidTrend: -50, paidTraffic: 2, paidTrafficTrend: -71.43, refDomains: 8800, refTrend: 0.4, authorityScore: 42, authorityChange: 0, isOwn: false, highlight: false },
-    { domain: 'caf.io', name: 'CAF (legacy)', tier: 'legacy', organicKeywords: 681, keywordsTrend: -20.35, organicTraffic: 1300, trafficTrend: -13.23, paidKeywords: 2, paidTrend: -33.33, paidTraffic: 54, paidTrafficTrend: -37.93, refDomains: 3300, refTrend: 1.95, authorityScore: 30, authorityChange: 0, isOwn: true, highlight: false },
-    { domain: 'certta.ai', name: 'Certta', tier: 'new', organicKeywords: 76, keywordsTrend: 216.67, organicTraffic: 60, trafficTrend: 71.43, paidKeywords: 0, paidTrend: 0, paidTraffic: 0, paidTrafficTrend: 0, refDomains: 646, refTrend: 1645.95, authorityScore: 18, authorityChange: 16, isOwn: true, highlight: true }
+    { domain: 'unico.io', name: 'Unico', tier: 'leader', organicKeywords: 5400, keywordsTrend: 1.11, organicTraffic: 39300, trafficTrend: 0.29, paidKeywords: 0, paidTrend: 0, paidTraffic: 0, paidTrafficTrend: 0, refDomains: 2900, refTrend: -3.5, authorityScore: 36, authorityChange: -3, isOwn: false, highlight: false },
+    { domain: 'idwall.co', name: 'idwall', tier: 'competitor', organicKeywords: 2700, keywordsTrend: 0.3, organicTraffic: 12400, trafficTrend: -5.87, paidKeywords: 0, paidTrend: 0, paidTraffic: 0, paidTrafficTrend: 0, refDomains: 1500, refTrend: -2.61, authorityScore: 33, authorityChange: 0, isOwn: false, highlight: false },
+    { domain: 'jumio.com', name: 'Jumio', tier: 'global', organicKeywords: 171, keywordsTrend: -1.16, organicTraffic: 512, trafficTrend: 0, paidKeywords: 1, paidTrend: -50, paidTraffic: 2, paidTrafficTrend: -71.43, refDomains: 8600, refTrend: -2.92, authorityScore: 42, authorityChange: 0, isOwn: false, highlight: false },
+    { domain: 'caf.io', name: 'CAF (legacy)', tier: 'legacy', organicKeywords: 515, keywordsTrend: -5.16, organicTraffic: 1200, trafficTrend: -2.57, paidKeywords: 2, paidTrend: -33.33, paidTraffic: 54, paidTrafficTrend: -37.93, refDomains: 3300, refTrend: -1.65, authorityScore: 29, authorityChange: 0, isOwn: true, highlight: false },
+    { domain: 'clear.sale', name: 'ClearSale', tier: 'leader', organicKeywords: 4000, keywordsTrend: 0.86, organicTraffic: 22500, trafficTrend: 3.73, paidKeywords: 5, paidTrend: 25, paidTraffic: 994, paidTrafficTrend: 26.14, refDomains: 3300, refTrend: -3.64, authorityScore: 42, authorityChange: -1, isOwn: false, highlight: false },
+    { domain: 'certta.ai', name: 'Certta', tier: 'new', organicKeywords: 101, keywordsTrend: 2.02, organicTraffic: 56, trafficTrend: 0, paidKeywords: 0, paidTrend: 0, paidTraffic: 0, paidTrafficTrend: 0, refDomains: 762, refTrend: 3.81, authorityScore: 20, authorityChange: 16, isOwn: true, highlight: true }
   ]
 };
 
 // Dados DUMMY do Funnel
 const FUNNEL_DATA = {
   period: "YTD 2026",
-  // Score Cards - Destaque
+  // Score Cards
   totalRevenue: { value: 666700, trend: 8.5 },
   ltv: { value: 45000, trend: 12.3 },
   arr: { value: 1200000, trend: 18.5 },
@@ -96,6 +99,18 @@ const GA4_MONTHLY_DATA = {
   }
 };
 
+// Dados DUMMY do Executive Brief
+const EXECUTIVE_BRIEF_FALLBACK = {
+  title: 'Authority +16 pts',
+  highlight1: 'Backlinks: Forbes, MIT, UOL, LinkedIn',
+  highlight2: 'Ref domains supera Unico (4.1K vs 2.9K)',
+  gap: 'Tráfego 31x abaixo do líder',
+  next1: 'Manter produção de conteúdo',
+  next2: 'Acelerar migração backlinks',
+  next3: 'Monitorar crossover de tráfego',
+  updatedAt: 'Mar 2026'
+};
+
 const AVAILABLE_MONTHS = ['Jan 2026', 'Fev 2026', 'Mar 2026'];
 
 // Parser de CSV genérico
@@ -130,7 +145,6 @@ function parseSmarketingCSV(csvText) {
   
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i];
-    // Ignora linhas de seção (começam com #)
     if (line.startsWith('#') || line.startsWith('"#')) continue;
     
     const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
@@ -141,11 +155,9 @@ function parseSmarketingCSV(csvText) {
     
     if (!metric || metric.startsWith('#')) continue;
     
-    // Converte valores numéricos
     let parsedValue = value;
     let parsedTrend = parseFloat(trend) || 0;
     
-    // Detecta tipo de valor
     if (!isNaN(parseFloat(value))) {
       parsedValue = parseFloat(value);
     }
@@ -160,11 +172,29 @@ function parseSmarketingCSV(csvText) {
   return data;
 }
 
+// Parser para Executive Brief
+function parseExecutiveBriefCSV(csvText) {
+  const lines = csvText.trim().split('\n');
+  const data = {};
+  
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+    const field = values[0];
+    const content = values[1];
+    
+    if (field) {
+      data[field] = content || '';
+    }
+  }
+  
+  return data;
+}
+
 // Converte dados do Sheets para formato do FUNNEL_DATA
 function convertSmarketingToFunnelData(sheetsData) {
   return {
     period: sheetsData.period?.value || "YTD 2026",
-    // Score Cards
     totalRevenue: { 
       value: parseFloat(sheetsData.totalRevenue?.value) || 666700, 
       trend: sheetsData.totalRevenue?.trend || 0 
@@ -177,7 +207,6 @@ function convertSmarketingToFunnelData(sheetsData) {
       value: parseFloat(sheetsData.arr?.value) || 1200000, 
       trend: sheetsData.arr?.trend || 0 
     },
-    // Funil
     leads: { 
       value: parseFloat(sheetsData.leads?.value) || 0, 
       trend: sheetsData.leads?.trend || 0 
@@ -202,7 +231,6 @@ function convertSmarketingToFunnelData(sheetsData) {
       value: parseFloat(sheetsData.winRate?.value) || 0, 
       trend: sheetsData.winRate?.trend || 0 
     },
-    // Financeiro
     adsSpend: { 
       value: parseFloat(sheetsData.adsSpend?.value) || 0, 
       trend: sheetsData.adsSpend?.trend || 0 
@@ -277,7 +305,6 @@ const SparklineChart = ({ data, width = 500, height = 140 }) => {
   
   return (
     <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet">
-      {/* Grid lines */}
       {[0, 0.5, 1].map((ratio, i) => (
         <line
           key={i}
@@ -291,63 +318,21 @@ const SparklineChart = ({ data, width = 500, height = 140 }) => {
         />
       ))}
       
-      {/* Previous period area */}
-      <path
-        d={createArea('sessionsPrev')}
-        fill="#64748b"
-        opacity="0.15"
-      />
+      <path d={createArea('sessionsPrev')} fill="#64748b" opacity="0.15" />
+      <path d={createPath('sessionsPrev')} fill="none" stroke="#64748b" strokeWidth="2" opacity="0.5" />
+      <path d={createArea('sessions')} fill="#3b82f6" opacity="0.2" />
+      <path d={createPath('sessions')} fill="none" stroke="#3b82f6" strokeWidth="2.5" />
       
-      {/* Previous period line */}
-      <path
-        d={createPath('sessionsPrev')}
-        fill="none"
-        stroke="#64748b"
-        strokeWidth="2"
-        opacity="0.5"
-      />
-      
-      {/* Current period area */}
-      <path
-        d={createArea('sessions')}
-        fill="#3b82f6"
-        opacity="0.2"
-      />
-      
-      {/* Current period line */}
-      <path
-        d={createPath('sessions')}
-        fill="none"
-        stroke="#3b82f6"
-        strokeWidth="2.5"
-      />
-      
-      {/* Data points - current */}
       {data.map((d, i) => (
-        <circle
-          key={`current-${i}`}
-          cx={getX(i)}
-          cy={getY(d.sessions)}
-          r="4"
-          fill="#3b82f6"
-        />
+        <circle key={`current-${i}`} cx={getX(i)} cy={getY(d.sessions)} r="4" fill="#3b82f6" />
       ))}
       
-      {/* X-axis labels */}
       {data.map((d, i) => (
-        <text
-          key={`label-${i}`}
-          x={getX(i)}
-          y={height - 8}
-          textAnchor="middle"
-          fill="#64748b"
-          fontSize="10"
-        >
+        <text key={`label-${i}`} x={getX(i)} y={height - 8} textAnchor="middle" fill="#64748b" fontSize="10">
           {d.date}
         </text>
       ))}
       
-      {/* Y-axis labels */}
       <text x={padding.left + 5} y={padding.top + 5} fill="#64748b" fontSize="9">
         {(maxValue / 1000).toFixed(1)}K
       </text>
@@ -392,12 +377,147 @@ const MonthSelector = ({ months, selected, onChange }) => {
   );
 };
 
+// Executive Brief Component
+const ExecutiveBrief = ({ data, onCopy }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    const text = `📊 *Certta SEO Update - ${data.updatedAt}*
+
+✅ *${data.title}*
+• ${data.highlight1}
+• ${data.highlight2}
+
+⚠️ *Gap principal:*
+${data.gap}
+
+🎯 *Próximos passos:*
+• ${data.next1}
+• ${data.next2}
+• ${data.next3}`;
+
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <div style={{
+      background: '#0f172a',
+      borderRadius: '12px',
+      padding: '20px',
+      border: '1px solid #334155',
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '16px'
+      }}>
+        <div style={{
+          fontSize: '12px',
+          color: '#64748b',
+          textTransform: 'uppercase',
+          letterSpacing: '0.5px',
+          fontWeight: '600'
+        }}>
+          📋 Executive Brief
+        </div>
+        <button
+          onClick={handleCopy}
+          style={{
+            background: copied ? '#10b981' : '#3b82f6',
+            color: '#fff',
+            border: 'none',
+            padding: '6px 12px',
+            borderRadius: '6px',
+            fontSize: '11px',
+            fontWeight: '500',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          {copied ? '✓ Copiado!' : '📤 Copiar'}
+        </button>
+      </div>
+
+      <div style={{ flex: 1 }}>
+        {/* Title/Highlight */}
+        <div style={{
+          background: '#10b98120',
+          borderLeft: '3px solid #10b981',
+          padding: '12px',
+          borderRadius: '0 8px 8px 0',
+          marginBottom: '16px'
+        }}>
+          <div style={{ fontSize: '16px', fontWeight: '700', color: '#10b981', marginBottom: '8px' }}>
+            {data.title}
+          </div>
+          <div style={{ fontSize: '13px', color: '#94a3b8', lineHeight: '1.5' }}>
+            • {data.highlight1}<br />
+            • {data.highlight2}
+          </div>
+        </div>
+
+        {/* Gap */}
+        <div style={{
+          background: '#ef444420',
+          borderLeft: '3px solid #ef4444',
+          padding: '12px',
+          borderRadius: '0 8px 8px 0',
+          marginBottom: '16px'
+        }}>
+          <div style={{ fontSize: '11px', fontWeight: '600', color: '#ef4444', marginBottom: '4px', textTransform: 'uppercase' }}>
+            Gap Principal
+          </div>
+          <div style={{ fontSize: '13px', color: '#fca5a5' }}>
+            {data.gap}
+          </div>
+        </div>
+
+        {/* Next Steps */}
+        <div style={{
+          background: '#3b82f620',
+          borderLeft: '3px solid #3b82f6',
+          padding: '12px',
+          borderRadius: '0 8px 8px 0'
+        }}>
+          <div style={{ fontSize: '11px', fontWeight: '600', color: '#3b82f6', marginBottom: '8px', textTransform: 'uppercase' }}>
+            Próximos Passos
+          </div>
+          <div style={{ fontSize: '13px', color: '#93c5fd', lineHeight: '1.6' }}>
+            • {data.next1}<br />
+            • {data.next2}<br />
+            • {data.next3}
+          </div>
+        </div>
+      </div>
+
+      <div style={{
+        marginTop: '16px',
+        paddingTop: '12px',
+        borderTop: '1px solid #334155',
+        fontSize: '11px',
+        color: '#64748b',
+        textAlign: 'right'
+      }}>
+        📅 Atualizado: {data.updatedAt}
+      </div>
+    </div>
+  );
+};
+
 function App() {
   const [hoveredRow, setHoveredRow] = useState(null);
   const [hoveredCompetitor, setHoveredCompetitor] = useState(null);
   const [competitors, setCompetitors] = useState(FALLBACK_DATA.competitors);
   const [lastUpdated, setLastUpdated] = useState(FALLBACK_DATA.lastUpdated);
   const [funnelData, setFunnelData] = useState(FUNNEL_DATA);
+  const [executiveBrief, setExecutiveBrief] = useState(EXECUTIVE_BRIEF_FALLBACK);
   const [selectedMonth, setSelectedMonth] = useState('Fev 2026');
   const [dataSource, setDataSource] = useState('fallback');
   const [smarketingSource, setSmarketingSource] = useState('fallback');
@@ -453,12 +573,26 @@ function App() {
             setFunnelData(convertedData);
             setSmarketingSource('sheets');
             loadedSomething = true;
-            console.log('✅ Smarketing data loaded from Sheets:', convertedData);
           }
         }
       } catch (error) {
         console.error('Erro ao carregar smarketing:', error);
         setSmarketingSource('fallback');
+      }
+
+      // Carregar Executive Brief
+      try {
+        if (SHEETS_CONFIG.executiveBriefUrl && !SHEETS_CONFIG.executiveBriefUrl.includes('COLE_AQUI')) {
+          const briefResponse = await fetch(SHEETS_CONFIG.executiveBriefUrl);
+          const briefCSV = await briefResponse.text();
+          const briefData = parseExecutiveBriefCSV(briefCSV);
+          
+          if (Object.keys(briefData).length > 0) {
+            setExecutiveBrief({ ...EXECUTIVE_BRIEF_FALLBACK, ...briefData });
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar executive brief:', error);
       }
 
       if (!loadedSomething) {
@@ -607,39 +741,13 @@ function App() {
       border: '1px solid #334155',
       minWidth: '140px'
     }}>
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        marginBottom: '8px'
-      }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
         <span style={{ fontSize: '16px' }}>{icon}</span>
-        <span style={{
-          fontSize: '11px',
-          color: '#64748b',
-          textTransform: 'uppercase',
-          letterSpacing: '0.5px'
-        }}>
-          {label}
-        </span>
+        <span style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</span>
       </div>
-      <div style={{
-        fontSize: '24px',
-        fontWeight: '700',
-        color: '#f8fafc',
-        marginBottom: '4px'
-      }}>
-        {value}
-      </div>
+      <div style={{ fontSize: '24px', fontWeight: '700', color: '#f8fafc', marginBottom: '4px' }}>{value}</div>
       {trend !== undefined && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '4px',
-          fontSize: '12px',
-          color: getTrendColor(trend),
-          fontWeight: '500'
-        }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: getTrendColor(trend), fontWeight: '500' }}>
           <span>{getTrendIcon(trend)}</span>
           <span>{Math.abs(trend).toFixed(1)}%</span>
           {trendLabel && <span style={{ color: '#64748b', marginLeft: '4px' }}>{trendLabel}</span>}
@@ -650,41 +758,11 @@ function App() {
 
   // GA4 KPI Card
   const GA4KpiCard = ({ label, value, trend, trendLabel }) => (
-    <div style={{
-      background: '#0f172a',
-      borderRadius: '10px',
-      padding: '16px',
-      border: '1px solid #334155'
-    }}>
-      <div style={{
-        fontSize: '11px',
-        color: '#64748b',
-        textTransform: 'uppercase',
-        letterSpacing: '0.5px',
-        marginBottom: '8px'
-      }}>
-        {label}
-      </div>
-      <div style={{
-        fontSize: '28px',
-        fontWeight: '700',
-        color: '#f8fafc',
-        marginBottom: '6px'
-      }}>
-        {value}
-      </div>
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '6px',
-        fontSize: '12px'
-      }}>
-        <span style={{
-          color: getTrendColor(trend),
-          fontWeight: '600'
-        }}>
-          {getTrendIcon(trend)} {Math.abs(trend).toFixed(1)}%
-        </span>
+    <div style={{ background: '#0f172a', borderRadius: '10px', padding: '16px', border: '1px solid #334155' }}>
+      <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>{label}</div>
+      <div style={{ fontSize: '28px', fontWeight: '700', color: '#f8fafc', marginBottom: '6px' }}>{value}</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}>
+        <span style={{ color: getTrendColor(trend), fontWeight: '600' }}>{getTrendIcon(trend)} {Math.abs(trend).toFixed(1)}%</span>
         <span style={{ color: '#64748b' }}>{trendLabel}</span>
       </div>
     </div>
@@ -692,38 +770,11 @@ function App() {
 
   // Funnel KPI Card
   const FunnelKpiCard = ({ label, value, trend, color }) => (
-    <div style={{
-      background: '#0f172a',
-      borderRadius: '10px',
-      padding: '14px',
-      border: '1px solid #334155'
-    }}>
-      <div style={{
-        fontSize: '10px',
-        color: '#64748b',
-        textTransform: 'uppercase',
-        letterSpacing: '0.5px',
-        marginBottom: '6px'
-      }}>
-        {label}
-      </div>
-      <div style={{
-        fontSize: '22px',
-        fontWeight: '700',
-        color: color || '#f8fafc',
-        marginBottom: '4px'
-      }}>
-        {value}
-      </div>
+    <div style={{ background: '#0f172a', borderRadius: '10px', padding: '14px', border: '1px solid #334155' }}>
+      <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>{label}</div>
+      <div style={{ fontSize: '22px', fontWeight: '700', color: color || '#f8fafc', marginBottom: '4px' }}>{value}</div>
       {trend !== undefined && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '4px',
-          fontSize: '11px',
-          color: getTrendColor(trend),
-          fontWeight: '500'
-        }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: getTrendColor(trend), fontWeight: '500' }}>
           <span>{getTrendIcon(trend)}</span>
           <span>{Math.abs(trend).toFixed(1)}% MoM</span>
         </div>
@@ -760,32 +811,11 @@ function App() {
     }}>
       {/* Header */}
       <div style={{ marginBottom: '32px' }}>
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '12px',
-          marginBottom: '8px',
-          flexWrap: 'wrap'
-        }}>
-          <h1 style={{ 
-            fontSize: '28px', 
-            fontWeight: '600',
-            color: '#f8fafc',
-            margin: 0,
-            letterSpacing: '-0.5px'
-          }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px', flexWrap: 'wrap' }}>
+          <h1 style={{ fontSize: '28px', fontWeight: '600', color: '#f8fafc', margin: 0, letterSpacing: '-0.5px' }}>
             Certta Performance Hub
           </h1>
-          <span style={{
-            background: '#10b98120',
-            color: '#10b981',
-            padding: '4px 12px',
-            borderRadius: '20px',
-            fontSize: '12px',
-            fontWeight: '500'
-          }}>
-            LIVE
-          </span>
+          <span style={{ background: '#10b98120', color: '#10b981', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '500' }}>LIVE</span>
           <span style={{
             background: dataSource === 'sheets' ? '#3b82f620' : '#f59e0b20',
             color: dataSource === 'sheets' ? '#3b82f6' : '#f59e0b',
@@ -797,119 +827,33 @@ function App() {
             {dataSource === 'sheets' ? '📊 Google Sheets' : '📁 Dados Locais'}
           </span>
         </div>
-        <p style={{ 
-          color: '#94a3b8', 
-          fontSize: '14px',
-          margin: 0 
-        }}>
+        <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>
           Smarketing & SEO Performance Dashboard • Updated: {lastUpdated}
         </p>
       </div>
 
-      {/* ============================================ */}
-      {/* GA4 WEBSITE ANALYTICS SECTION */}
-      {/* ============================================ */}
-      <div style={{
-        background: '#1e293b',
-        borderRadius: '16px',
-        padding: '24px',
-        marginBottom: '24px',
-        border: '1px solid #334155'
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '20px',
-          flexWrap: 'wrap',
-          gap: '12px'
-        }}>
+      {/* GA4 Website Analytics */}
+      <div style={{ background: '#1e293b', borderRadius: '16px', padding: '24px', marginBottom: '24px', border: '1px solid #334155' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
-            <div style={{ 
-              fontSize: '16px', 
-              fontWeight: '600',
-              color: '#f8fafc',
-              marginBottom: '4px'
-            }}>
-              Website Analytics
-            </div>
-            <div style={{ 
-              fontSize: '12px', 
-              color: '#64748b'
-            }}>
-              Google Analytics 4 • certta.ai
-            </div>
+            <div style={{ fontSize: '16px', fontWeight: '600', color: '#f8fafc', marginBottom: '4px' }}>Website Analytics</div>
+            <div style={{ fontSize: '12px', color: '#64748b' }}>Google Analytics 4 • certta.ai</div>
           </div>
-          <MonthSelector 
-            months={AVAILABLE_MONTHS} 
-            selected={selectedMonth} 
-            onChange={setSelectedMonth} 
-          />
+          <MonthSelector months={AVAILABLE_MONTHS} selected={selectedMonth} onChange={setSelectedMonth} />
         </div>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1.2fr',
-          gap: '24px'
-        }}>
-          {/* Left side: KPIs */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '12px'
-          }}>
-            <GA4KpiCard 
-              label="Sessions" 
-              value={formatNumber(ga4Data.metrics.sessions.value)} 
-              trend={ga4Data.metrics.sessions.trend}
-              trendLabel="vs. mês anterior"
-            />
-            <GA4KpiCard 
-              label="Page Views" 
-              value={formatNumber(ga4Data.metrics.pageViews.value)} 
-              trend={ga4Data.metrics.pageViews.trend}
-              trendLabel="vs. mês anterior"
-            />
-            <GA4KpiCard 
-              label="Active Users" 
-              value={formatNumber(ga4Data.metrics.activeUsers.value)} 
-              trend={ga4Data.metrics.activeUsers.trend}
-              trendLabel="vs. mês anterior"
-            />
-            <GA4KpiCard 
-              label="New Users %" 
-              value={`${ga4Data.metrics.newUserPercent.value}%`} 
-              trend={ga4Data.metrics.newUserPercent.trend}
-              trendLabel="vs. mês anterior"
-            />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+            <GA4KpiCard label="Sessions" value={formatNumber(ga4Data.metrics.sessions.value)} trend={ga4Data.metrics.sessions.trend} trendLabel="vs. mês anterior" />
+            <GA4KpiCard label="Page Views" value={formatNumber(ga4Data.metrics.pageViews.value)} trend={ga4Data.metrics.pageViews.trend} trendLabel="vs. mês anterior" />
+            <GA4KpiCard label="Active Users" value={formatNumber(ga4Data.metrics.activeUsers.value)} trend={ga4Data.metrics.activeUsers.trend} trendLabel="vs. mês anterior" />
+            <GA4KpiCard label="New Users %" value={`${ga4Data.metrics.newUserPercent.value}%`} trend={ga4Data.metrics.newUserPercent.trend} trendLabel="vs. mês anterior" />
           </div>
 
-          {/* Right side: Trend Chart */}
-          <div style={{
-            background: '#0f172a',
-            borderRadius: '12px',
-            padding: '16px',
-            border: '1px solid #334155'
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '12px'
-            }}>
-              <div style={{
-                fontSize: '11px',
-                color: '#64748b',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}>
-                Sessions Trend • {selectedMonth}
-              </div>
-              <div style={{
-                display: 'flex',
-                gap: '16px',
-                fontSize: '11px'
-              }}>
+          <div style={{ background: '#0f172a', borderRadius: '12px', padding: '16px', border: '1px solid #334155' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Sessions Trend • {selectedMonth}</div>
+              <div style={{ display: 'flex', gap: '16px', fontSize: '11px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <div style={{ width: '12px', height: '3px', background: '#3b82f6', borderRadius: '2px' }} />
                   <span style={{ color: '#94a3b8' }}>Current</span>
@@ -937,150 +881,41 @@ function App() {
         gap: '24px'
       }}>
         <div>
-          <div style={{ 
-            fontSize: '12px', 
-            color: '#a5b4fc', 
-            marginBottom: '8px',
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px'
-          }}>
-            Domain Migration Status
-          </div>
-          <div style={{ 
-            fontSize: '32px', 
-            fontWeight: '700',
-            color: '#f8fafc',
-            marginBottom: '4px'
-          }}>
-            {migrationProgress}%
-          </div>
-          <div style={{ 
-            fontSize: '13px', 
-            color: '#94a3b8' 
-          }}>
-            Traffic on certta.ai
-          </div>
-          <div style={{
-            marginTop: '12px',
-            background: '#1e293b',
-            borderRadius: '8px',
-            height: '8px',
-            overflow: 'hidden'
-          }}>
-            <div style={{
-              width: `${migrationProgress}%`,
-              height: '100%',
-              background: 'linear-gradient(90deg, #10b981, #34d399)',
-              borderRadius: '8px',
-              transition: 'width 0.5s ease'
-            }} />
+          <div style={{ fontSize: '12px', color: '#a5b4fc', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Domain Migration Status</div>
+          <div style={{ fontSize: '32px', fontWeight: '700', color: '#f8fafc', marginBottom: '4px' }}>{migrationProgress}%</div>
+          <div style={{ fontSize: '13px', color: '#94a3b8' }}>Traffic on certta.ai</div>
+          <div style={{ marginTop: '12px', background: '#1e293b', borderRadius: '8px', height: '8px', overflow: 'hidden' }}>
+            <div style={{ width: `${migrationProgress}%`, height: '100%', background: 'linear-gradient(90deg, #10b981, #34d399)', borderRadius: '8px', transition: 'width 0.5s ease' }} />
           </div>
         </div>
 
         <div style={{ borderLeft: '1px solid #4338ca40', paddingLeft: '24px' }}>
-          <div style={{ 
-            fontSize: '12px', 
-            color: '#fca5a5', 
-            marginBottom: '8px',
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px'
-          }}>
-            ⚠️ Legacy Decay (caf.io)
-          </div>
-          <div style={{ 
-            fontSize: '32px', 
-            fontWeight: '700',
-            color: '#ef4444',
-            marginBottom: '4px'
-          }}>
-            {cafData.trafficTrend || 0}%
-          </div>
-          <div style={{ 
-            fontSize: '13px', 
-            color: '#94a3b8' 
-          }}>
-            Organic traffic MoM
-          </div>
+          <div style={{ fontSize: '12px', color: '#fca5a5', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>⚠️ Legacy Decay (caf.io)</div>
+          <div style={{ fontSize: '32px', fontWeight: '700', color: '#ef4444', marginBottom: '4px' }}>{cafData.trafficTrend || 0}%</div>
+          <div style={{ fontSize: '13px', color: '#94a3b8' }}>Organic traffic MoM</div>
         </div>
 
         <div style={{ borderLeft: '1px solid #4338ca40', paddingLeft: '24px' }}>
-          <div style={{ 
-            fontSize: '12px', 
-            color: '#86efac', 
-            marginBottom: '8px',
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px'
-          }}>
-            🚀 New Domain Growth (certta.ai)
-          </div>
-          <div style={{ 
-            fontSize: '32px', 
-            fontWeight: '700',
-            color: '#10b981',
-            marginBottom: '4px'
-          }}>
-            +{certtaData.trafficTrend || 0}%
-          </div>
-          <div style={{ 
-            fontSize: '13px', 
-            color: '#94a3b8' 
-          }}>
-            Organic traffic MoM
-          </div>
+          <div style={{ fontSize: '12px', color: '#86efac', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>🚀 New Domain Growth (certta.ai)</div>
+          <div style={{ fontSize: '32px', fontWeight: '700', color: '#10b981', marginBottom: '4px' }}>+{certtaData.trafficTrend || 0}%</div>
+          <div style={{ fontSize: '13px', color: '#94a3b8' }}>Organic traffic MoM</div>
         </div>
       </div>
 
       {/* Spider Chart Section */}
-      <div style={{
-        background: '#1e293b',
-        borderRadius: '16px',
-        padding: '24px',
-        marginBottom: '24px',
-        border: '1px solid #334155'
-      }}>
-        <div style={{ 
-          fontSize: '16px', 
-          fontWeight: '600',
-          color: '#f8fafc',
-          marginBottom: '20px'
-        }}>
-          Competitive Positioning Radar
-        </div>
+      <div style={{ background: '#1e293b', borderRadius: '16px', padding: '24px', marginBottom: '24px', border: '1px solid #334155' }}>
+        <div style={{ fontSize: '16px', fontWeight: '600', color: '#f8fafc', marginBottom: '20px' }}>Competitive Positioning Radar</div>
         
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(300px, 400px) 1fr',
-          gap: '32px',
-          alignItems: 'start'
-        }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 400px) 1fr', gap: '32px', alignItems: 'start' }}>
           {/* Spider Chart SVG */}
           <svg width="100%" viewBox="0 0 440 400" style={{ maxWidth: '440px' }}>
             {[20, 40, 60, 80, 100].map((percent, i) => (
-              <circle
-                key={i}
-                cx={centerX}
-                cy={centerY}
-                r={(percent / 100) * radius}
-                fill="none"
-                stroke="#334155"
-                strokeWidth="1"
-                strokeDasharray={i === 4 ? "none" : "4,4"}
-              />
+              <circle key={i} cx={centerX} cy={centerY} r={(percent / 100) * radius} fill="none" stroke="#334155" strokeWidth="1" strokeDasharray={i === 4 ? "none" : "4,4"} />
             ))}
             
             {axes.map((_, i) => {
               const point = getPoint(100, i);
-              return (
-                <line
-                  key={i}
-                  x1={centerX}
-                  y1={centerY}
-                  x2={point.x}
-                  y2={point.y}
-                  stroke="#334155"
-                  strokeWidth="1"
-                />
-              );
+              return <line key={i} x1={centerX} y1={centerY} x2={point.x} y2={point.y} stroke="#334155" strokeWidth="1" />;
             })}
             
             {axes.map((label, i) => {
@@ -1088,16 +923,7 @@ function App() {
               const isTop = i === 0;
               const isBottom = i === Math.floor(numAxes / 2);
               return (
-                <text
-                  key={i}
-                  x={point.x}
-                  y={point.y}
-                  textAnchor="middle"
-                  dominantBaseline={isTop ? "auto" : isBottom ? "hanging" : "middle"}
-                  fill="#94a3b8"
-                  fontSize="11"
-                  fontWeight="500"
-                >
+                <text key={i} x={point.x} y={point.y} textAnchor="middle" dominantBaseline={isTop ? "auto" : isBottom ? "hanging" : "middle"} fill="#94a3b8" fontSize="11" fontWeight="500">
                   {label}
                 </text>
               );
@@ -1133,40 +959,16 @@ function App() {
             ))}
             
             {[25, 50, 75, 100].map((percent, i) => (
-              <text
-                key={i}
-                x={centerX + 5}
-                y={centerY - (percent / 100) * radius}
-                fill="#64748b"
-                fontSize="9"
-                dominantBaseline="middle"
-              >
-                {percent}%
-              </text>
+              <text key={i} x={centerX + 5} y={centerY - (percent / 100) * radius} fill="#64748b" fontSize="9" dominantBaseline="middle">{percent}%</text>
             ))}
           </svg>
 
           {/* Right side: Legend + KPIs + Insights */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            
-            {/* Top row: Legend + KPIs */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '180px 1fr',
-              gap: '24px',
-              alignItems: 'start'
-            }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: '24px', alignItems: 'start' }}>
               {/* Legend */}
               <div>
-                <div style={{ 
-                  fontSize: '12px', 
-                  color: '#64748b', 
-                  marginBottom: '12px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
-                }}>
-                  Competitors
-                </div>
+                <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Competitors</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   {normalizedData.map((competitor, idx) => (
                     <div
@@ -1184,18 +986,8 @@ function App() {
                         transition: 'background 0.15s ease'
                       }}
                     >
-                      <div style={{
-                        width: '10px',
-                        height: '10px',
-                        borderRadius: '2px',
-                        background: competitor.color,
-                        flexShrink: 0
-                      }} />
-                      <span style={{ 
-                        fontSize: '13px',
-                        fontWeight: competitor.name.includes('Certta') ? '600' : '400',
-                        color: competitor.name.includes('Certta') ? '#10b981' : '#e2e8f0'
-                      }}>
+                      <div style={{ width: '10px', height: '10px', borderRadius: '2px', background: competitor.color, flexShrink: 0 }} />
+                      <span style={{ fontSize: '13px', fontWeight: competitor.name.includes('Certta') ? '600' : '400', color: competitor.name.includes('Certta') ? '#10b981' : '#e2e8f0' }}>
                         {competitor.name}
                       </span>
                     </div>
@@ -1205,68 +997,19 @@ function App() {
 
               {/* Certta KPIs */}
               <div>
-                <div style={{ 
-                  fontSize: '12px', 
-                  color: '#64748b', 
-                  marginBottom: '12px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
-                }}>
-                  🎯 Certta Combined Metrics
-                </div>
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-                  gap: '12px'
-                }}>
-                  <KpiCard 
-                    icon="🔑"
-                    label="Keywords"
-                    value={formatNumber(certtaCombined.organicKeywords)}
-                    trend={(certtaData.keywordsTrend || 0)}
-                    trendLabel="MoM"
-                  />
-                  <KpiCard 
-                    icon="📈"
-                    label="Org. Traffic"
-                    value={formatNumber(certtaCombined.organicTraffic)}
-                    trend={(certtaData.trafficTrend || 0)}
-                    trendLabel="MoM"
-                  />
-                  <KpiCard 
-                    icon="🔗"
-                    label="Ref Domains"
-                    value={formatNumber(certtaCombined.refDomains)}
-                    trend={(certtaData.refTrend || 0)}
-                    trendLabel="MoM"
-                  />
-                  <KpiCard 
-                    icon="⭐"
-                    label="Authority"
-                    value={certtaCombined.authorityScore}
-                    trend={certtaData.authorityChange || 0}
-                    trendLabel="pts"
-                  />
+                <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>🎯 Certta Combined Metrics</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px' }}>
+                  <KpiCard icon="🔑" label="Keywords" value={formatNumber(certtaCombined.organicKeywords)} trend={(certtaData.keywordsTrend || 0)} trendLabel="MoM" />
+                  <KpiCard icon="📈" label="Org. Traffic" value={formatNumber(certtaCombined.organicTraffic)} trend={(certtaData.trafficTrend || 0)} trendLabel="MoM" />
+                  <KpiCard icon="🔗" label="Ref Domains" value={formatNumber(certtaCombined.refDomains)} trend={(certtaData.refTrend || 0)} trendLabel="MoM" />
+                  <KpiCard icon="⭐" label="Authority" value={certtaCombined.authorityScore} trend={certtaData.authorityChange || 0} trendLabel="pts" />
                 </div>
               </div>
             </div>
 
             {/* Radar Insights */}
-            <div style={{
-              background: '#0f172a',
-              borderRadius: '12px',
-              padding: '16px',
-              border: '1px solid #334155'
-            }}>
-              <div style={{ 
-                fontSize: '12px', 
-                color: '#64748b', 
-                marginBottom: '12px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}>
-                📊 Radar Analysis
-              </div>
+            <div style={{ background: '#0f172a', borderRadius: '12px', padding: '16px', border: '1px solid #334155' }}>
+              <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>📊 Radar Analysis</div>
               <div style={{ fontSize: '13px', color: '#94a3b8', lineHeight: '1.7' }}>
                 <p style={{ margin: '0 0 10px 0' }}>
                   <strong style={{ color: '#10b981' }}>Certta's strength:</strong> Ref Domains ({formatNumber(certtaCombined.refDomains)} combined) competitive with market leaders due to caf.io legacy backlinks.
@@ -1283,217 +1026,155 @@ function App() {
         </div>
       </div>
 
-      {/* Main Table */}
-      <div style={{
-        background: '#1e293b',
-        borderRadius: '16px',
-        overflow: 'hidden',
-        border: '1px solid #334155'
-      }}>
-        <div style={{
-          padding: '16px 24px',
-          borderBottom: '1px solid #334155'
-        }}>
-          <div style={{ 
-            fontSize: '16px', 
-            fontWeight: '600',
-            color: '#f8fafc'
-          }}>
-            Detailed Competitive Metrics
+      {/* Competitive Metrics Table + Executive Brief */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '24px', marginBottom: '24px' }}>
+        {/* Compressed Table */}
+        <div style={{ background: '#1e293b', borderRadius: '16px', overflow: 'hidden', border: '1px solid #334155' }}>
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid #334155' }}>
+            <div style={{ fontSize: '16px', fontWeight: '600', color: '#f8fafc' }}>Detailed Competitive Metrics</div>
           </div>
-        </div>
-        
-        {/* Table Header */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '200px repeat(6, 1fr)',
-          gap: '8px',
-          padding: '16px 24px',
-          background: '#0f172a',
-          borderBottom: '1px solid #334155',
-          fontSize: '11px',
-          fontWeight: '600',
-          color: '#64748b',
-          textTransform: 'uppercase',
-          letterSpacing: '0.5px'
-        }}>
-          <div>Domain</div>
-          <div style={{ textAlign: 'right' }}>Keywords</div>
-          <div style={{ textAlign: 'right' }}>Organic Traffic</div>
-          <div style={{ textAlign: 'right' }}>Paid KWs</div>
-          <div style={{ textAlign: 'right' }}>Paid Traffic</div>
-          <div style={{ textAlign: 'right' }}>Ref Domains</div>
-          <div style={{ textAlign: 'center' }}>Authority</div>
-        </div>
+          
+          {/* Table Header */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '140px repeat(5, 1fr)',
+            gap: '4px',
+            padding: '12px 20px',
+            background: '#0f172a',
+            borderBottom: '1px solid #334155',
+            fontSize: '10px',
+            fontWeight: '600',
+            color: '#64748b',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
+          }}>
+            <div>Domain</div>
+            <div style={{ textAlign: 'right' }}>KWs</div>
+            <div style={{ textAlign: 'right' }}>Traffic</div>
+            <div style={{ textAlign: 'right' }}>Paid</div>
+            <div style={{ textAlign: 'right' }}>Refs</div>
+            <div style={{ textAlign: 'center' }}>Auth</div>
+          </div>
 
-        {/* Table Rows */}
-        {competitors.map((company, index) => {
-          const tierStyle = getTierBadge(company.tier);
-          return (
-            <div
-              key={company.domain}
-              onMouseEnter={() => setHoveredRow(index)}
-              onMouseLeave={() => setHoveredRow(null)}
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '200px repeat(6, 1fr)',
-                gap: '8px',
-                padding: '16px 24px',
-                borderBottom: index < competitors.length - 1 ? '1px solid #334155' : 'none',
-                background: company.highlight 
-                  ? 'linear-gradient(90deg, #10b98110 0%, transparent 100%)'
-                  : company.isOwn && !company.highlight
-                  ? 'linear-gradient(90deg, #ef444410 0%, transparent 100%)'
-                  : hoveredRow === index 
-                  ? '#334155' 
-                  : 'transparent',
-                transition: 'background 0.15s ease',
-                alignItems: 'center'
-              }}
-            >
-              <div>
-                <div style={{ 
-                  fontWeight: '600',
-                  color: company.highlight ? '#10b981' : company.isOwn ? '#f87171' : '#f8fafc',
-                  fontSize: '14px',
-                  marginBottom: '4px'
-                }}>
-                  {company.name}
-                </div>
-                <div style={{ 
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  flexWrap: 'wrap'
-                }}>
-                  <span style={{ fontSize: '12px', color: '#64748b' }}>{company.domain}</span>
+          {/* Table Rows */}
+          {competitors.map((company, index) => {
+            const tierStyle = getTierBadge(company.tier);
+            return (
+              <div
+                key={company.domain}
+                onMouseEnter={() => setHoveredRow(index)}
+                onMouseLeave={() => setHoveredRow(null)}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '140px repeat(5, 1fr)',
+                  gap: '4px',
+                  padding: '12px 20px',
+                  borderBottom: index < competitors.length - 1 ? '1px solid #334155' : 'none',
+                  background: company.highlight 
+                    ? 'linear-gradient(90deg, #10b98110 0%, transparent 100%)'
+                    : company.isOwn && !company.highlight
+                    ? 'linear-gradient(90deg, #ef444410 0%, transparent 100%)'
+                    : hoveredRow === index 
+                    ? '#334155' 
+                    : 'transparent',
+                  transition: 'background 0.15s ease',
+                  alignItems: 'center'
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: '600', color: company.highlight ? '#10b981' : company.isOwn ? '#f87171' : '#f8fafc', fontSize: '13px' }}>
+                    {company.name}
+                  </div>
                   <span style={{
                     background: tierStyle.bg,
                     color: tierStyle.color,
-                    padding: '2px 8px',
-                    borderRadius: '10px',
-                    fontSize: '10px',
+                    padding: '1px 6px',
+                    borderRadius: '8px',
+                    fontSize: '9px',
                     fontWeight: '500'
                   }}>
                     {tierStyle.label}
                   </span>
                 </div>
-              </div>
 
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontWeight: '600', color: '#f8fafc' }}>{formatNumber(company.organicKeywords)}</div>
-                <div style={{ fontSize: '12px', color: getTrendColor(company.keywordsTrend), fontWeight: '500' }}>
-                  {getTrendIcon(company.keywordsTrend)} {Math.abs(company.keywordsTrend).toFixed(1)}%
-                </div>
-              </div>
-
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontWeight: '600', color: '#f8fafc' }}>{formatNumber(company.organicTraffic)}</div>
-                <div style={{ fontSize: '12px', color: getTrendColor(company.trafficTrend), fontWeight: '500' }}>
-                  {getTrendIcon(company.trafficTrend)} {Math.abs(company.trafficTrend).toFixed(1)}%
-                </div>
-              </div>
-
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontWeight: '600', color: company.paidKeywords === 0 ? '#475569' : '#f8fafc' }}>
-                  {company.paidKeywords === 0 ? '—' : formatNumber(company.paidKeywords)}
-                </div>
-                {company.paidKeywords > 0 && (
-                  <div style={{ fontSize: '12px', color: getTrendColor(company.paidTrend), fontWeight: '500' }}>
-                    {getTrendIcon(company.paidTrend)} {Math.abs(company.paidTrend).toFixed(0)}%
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontWeight: '600', color: '#f8fafc', fontSize: '13px' }}>{formatNumber(company.organicKeywords)}</div>
+                  <div style={{ fontSize: '10px', color: getTrendColor(company.keywordsTrend), fontWeight: '500' }}>
+                    {getTrendIcon(company.keywordsTrend)} {Math.abs(company.keywordsTrend).toFixed(1)}%
                   </div>
-                )}
-              </div>
-
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontWeight: '600', color: company.paidTraffic === 0 ? '#475569' : '#f8fafc' }}>
-                  {company.paidTraffic === 0 ? '—' : formatNumber(company.paidTraffic)}
                 </div>
-                {company.paidTraffic > 0 && (
-                  <div style={{ fontSize: '12px', color: getTrendColor(company.paidTrafficTrend), fontWeight: '500' }}>
-                    {getTrendIcon(company.paidTrafficTrend)} {Math.abs(company.paidTrafficTrend).toFixed(0)}%
+
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontWeight: '600', color: '#f8fafc', fontSize: '13px' }}>{formatNumber(company.organicTraffic)}</div>
+                  <div style={{ fontSize: '10px', color: getTrendColor(company.trafficTrend), fontWeight: '500' }}>
+                    {getTrendIcon(company.trafficTrend)} {Math.abs(company.trafficTrend).toFixed(1)}%
                   </div>
-                )}
-              </div>
-
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontWeight: '600', color: '#f8fafc' }}>{formatNumber(company.refDomains)}</div>
-                <div style={{ fontSize: '12px', color: getTrendColor(company.refTrend), fontWeight: '500' }}>
-                  {getTrendIcon(company.refTrend)} {Math.abs(company.refTrend) > 100 ? '>100' : Math.abs(company.refTrend).toFixed(1)}%
                 </div>
-              </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                <div style={{
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: '50%',
-                  background: `conic-gradient(${getAuthorityColor(company.authorityScore)} ${company.authorityScore * 3.6}deg, #334155 0deg)`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontWeight: '600', color: company.paidTraffic === 0 ? '#475569' : '#f8fafc', fontSize: '13px' }}>
+                    {company.paidTraffic === 0 ? '—' : formatNumber(company.paidTraffic)}
+                  </div>
+                  {company.paidTraffic > 0 && (
+                    <div style={{ fontSize: '10px', color: getTrendColor(company.paidTrafficTrend), fontWeight: '500' }}>
+                      {getTrendIcon(company.paidTrafficTrend)} {Math.abs(company.paidTrafficTrend).toFixed(0)}%
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontWeight: '600', color: '#f8fafc', fontSize: '13px' }}>{formatNumber(company.refDomains)}</div>
+                  <div style={{ fontSize: '10px', color: getTrendColor(company.refTrend), fontWeight: '500' }}>
+                    {getTrendIcon(company.refTrend)} {Math.abs(company.refTrend).toFixed(1)}%
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
                   <div style={{
-                    width: '38px',
-                    height: '38px',
+                    width: '36px',
+                    height: '36px',
                     borderRadius: '50%',
-                    background: '#1e293b',
+                    background: `conic-gradient(${getAuthorityColor(company.authorityScore)} ${company.authorityScore * 3.6}deg, #334155 0deg)`,
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: '700',
-                    fontSize: '14px',
-                    color: getAuthorityColor(company.authorityScore)
+                    justifyContent: 'center'
                   }}>
-                    {company.authorityScore}
+                    <div style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '50%',
+                      background: '#1e293b',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: '700',
+                      fontSize: '11px',
+                      color: getAuthorityColor(company.authorityScore)
+                    }}>
+                      {company.authorityScore}
+                    </div>
                   </div>
+                  {company.authorityChange !== 0 && (
+                    <div style={{ fontSize: '9px', fontWeight: '600', color: company.authorityChange > 0 ? '#10b981' : '#ef4444' }}>
+                      {company.authorityChange > 0 ? '+' : ''}{company.authorityChange}
+                    </div>
+                  )}
                 </div>
-                {company.authorityChange !== 0 && (
-                  <div style={{
-                    fontSize: '11px',
-                    fontWeight: '600',
-                    color: company.authorityChange > 0 ? '#10b981' : '#ef4444'
-                  }}>
-                    {company.authorityChange > 0 ? '+' : ''}{company.authorityChange}
-                  </div>
-                )}
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+
+        {/* Executive Brief Panel */}
+        <ExecutiveBrief data={executiveBrief} />
       </div>
 
-      {/* ============================================ */}
-      {/* SMARKETING FUNNEL SECTION */}
-      {/* ============================================ */}
-      <div style={{
-        background: '#1e293b',
-        borderRadius: '16px',
-        padding: '24px',
-        marginTop: '24px',
-        border: '1px solid #334155'
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '20px'
-        }}>
+      {/* Smarketing Funnel Section */}
+      <div style={{ background: '#1e293b', borderRadius: '16px', padding: '24px', marginBottom: '24px', border: '1px solid #334155' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <div>
-            <div style={{ 
-              fontSize: '16px', 
-              fontWeight: '600',
-              color: '#f8fafc',
-              marginBottom: '4px'
-            }}>
-              Smarketing Performance
-            </div>
-            <div style={{ 
-              fontSize: '12px', 
-              color: '#64748b'
-            }}>
-              Full-funnel results: from lead generation to closed revenue
-            </div>
+            <div style={{ fontSize: '16px', fontWeight: '600', color: '#f8fafc', marginBottom: '4px' }}>Smarketing Performance</div>
+            <div style={{ fontSize: '12px', color: '#64748b' }}>Full-funnel results: from lead generation to closed revenue</div>
           </div>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <span style={{
@@ -1506,254 +1187,85 @@ function App() {
             }}>
               {smarketingSource === 'sheets' ? '🔗 Live Data' : '📁 Demo'}
             </span>
-            <span style={{
-              background: '#06b6d420',
-              color: '#06b6d4',
-              padding: '4px 12px',
-              borderRadius: '12px',
-              fontSize: '11px',
-              fontWeight: '500'
-            }}>
+            <span style={{ background: '#06b6d420', color: '#06b6d4', padding: '4px 12px', borderRadius: '12px', fontSize: '11px', fontWeight: '500' }}>
               {funnelData.period}
             </span>
           </div>
         </div>
 
-        {/* Score Cards - Top Metrics */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '16px',
-          marginBottom: '24px'
-        }}>
-          {/* Total Revenue */}
-          <div style={{
-            background: 'linear-gradient(135deg, #065f46 0%, #047857 100%)',
-            borderRadius: '12px',
-            padding: '20px',
-            border: '1px solid #10b98140'
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              marginBottom: '12px'
-            }}>
+        {/* Score Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
+          <div style={{ background: 'linear-gradient(135deg, #065f46 0%, #047857 100%)', borderRadius: '12px', padding: '20px', border: '1px solid #10b98140' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
               <span style={{ fontSize: '20px' }}>💰</span>
-              <span style={{
-                fontSize: '11px',
-                color: '#a7f3d0',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-                fontWeight: '500'
-              }}>
-                Total Revenue
-              </span>
+              <span style={{ fontSize: '11px', color: '#a7f3d0', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '500' }}>Total Revenue</span>
             </div>
-            <div style={{
-              fontSize: '32px',
-              fontWeight: '700',
-              color: '#fff',
-              marginBottom: '8px'
-            }}>
-              {formatCurrency(funnelData.totalRevenue.value)}
-            </div>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '13px'
-            }}>
-              <span style={{
-                color: '#6ee7b7',
-                fontWeight: '600'
-              }}>
-                {getTrendIcon(funnelData.totalRevenue.trend)} {Math.abs(funnelData.totalRevenue.trend).toFixed(1)}%
-              </span>
+            <div style={{ fontSize: '32px', fontWeight: '700', color: '#fff', marginBottom: '8px' }}>{formatCurrency(funnelData.totalRevenue.value)}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
+              <span style={{ color: '#6ee7b7', fontWeight: '600' }}>{getTrendIcon(funnelData.totalRevenue.trend)} {Math.abs(funnelData.totalRevenue.trend).toFixed(1)}%</span>
               <span style={{ color: '#a7f3d0' }}>vs. período anterior</span>
             </div>
           </div>
 
-          {/* LTV */}
-          <div style={{
-            background: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)',
-            borderRadius: '12px',
-            padding: '20px',
-            border: '1px solid #3b82f640'
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              marginBottom: '12px'
-            }}>
+          <div style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)', borderRadius: '12px', padding: '20px', border: '1px solid #3b82f640' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
               <span style={{ fontSize: '20px' }}>👤</span>
-              <span style={{
-                fontSize: '11px',
-                color: '#bfdbfe',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-                fontWeight: '500'
-              }}>
-                Lifetime Value
-              </span>
+              <span style={{ fontSize: '11px', color: '#bfdbfe', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '500' }}>Lifetime Value</span>
             </div>
-            <div style={{
-              fontSize: '32px',
-              fontWeight: '700',
-              color: '#fff',
-              marginBottom: '8px'
-            }}>
-              {formatCurrency(funnelData.ltv.value)}
-            </div>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '13px'
-            }}>
-              <span style={{
-                color: '#93c5fd',
-                fontWeight: '600'
-              }}>
-                {getTrendIcon(funnelData.ltv.trend)} {Math.abs(funnelData.ltv.trend).toFixed(1)}%
-              </span>
+            <div style={{ fontSize: '32px', fontWeight: '700', color: '#fff', marginBottom: '8px' }}>{formatCurrency(funnelData.ltv.value)}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
+              <span style={{ color: '#93c5fd', fontWeight: '600' }}>{getTrendIcon(funnelData.ltv.trend)} {Math.abs(funnelData.ltv.trend).toFixed(1)}%</span>
               <span style={{ color: '#bfdbfe' }}>vs. período anterior</span>
             </div>
           </div>
 
-          {/* ARR */}
-          <div style={{
-            background: 'linear-gradient(135deg, #581c87 0%, #7c3aed 100%)',
-            borderRadius: '12px',
-            padding: '20px',
-            border: '1px solid #8b5cf640'
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              marginBottom: '12px'
-            }}>
+          <div style={{ background: 'linear-gradient(135deg, #581c87 0%, #7c3aed 100%)', borderRadius: '12px', padding: '20px', border: '1px solid #8b5cf640' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
               <span style={{ fontSize: '20px' }}>📈</span>
-              <span style={{
-                fontSize: '11px',
-                color: '#e9d5ff',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-                fontWeight: '500'
-              }}>
-                ARR
-              </span>
+              <span style={{ fontSize: '11px', color: '#e9d5ff', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '500' }}>ARR</span>
             </div>
-            <div style={{
-              fontSize: '32px',
-              fontWeight: '700',
-              color: '#fff',
-              marginBottom: '8px'
-            }}>
-              {formatCurrency(funnelData.arr.value)}
-            </div>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '13px'
-            }}>
-              <span style={{
-                color: '#c4b5fd',
-                fontWeight: '600'
-              }}>
-                {getTrendIcon(funnelData.arr.trend)} {Math.abs(funnelData.arr.trend).toFixed(1)}%
-              </span>
+            <div style={{ fontSize: '32px', fontWeight: '700', color: '#fff', marginBottom: '8px' }}>{formatCurrency(funnelData.arr.value)}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
+              <span style={{ color: '#c4b5fd', fontWeight: '600' }}>{getTrendIcon(funnelData.arr.trend)} {Math.abs(funnelData.arr.trend).toFixed(1)}%</span>
               <span style={{ color: '#e9d5ff' }}>vs. período anterior</span>
             </div>
           </div>
         </div>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '24px'
-        }}>
-          {/* Left side: KPIs Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
           <div>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '12px',
-              marginBottom: '12px'
-            }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '12px' }}>
               <FunnelKpiCard label="Leads" value={formatNumber(funnelData.leads.value)} trend={funnelData.leads.trend} color="#3b82f6" />
               <FunnelKpiCard label="MQL" value={formatNumber(funnelData.mql.value)} trend={funnelData.mql.trend} color="#f97316" />
               <FunnelKpiCard label="SQL" value={formatNumber(funnelData.sql.value)} trend={funnelData.sql.trend} color="#8b5cf6" />
             </div>
-
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '12px',
-              marginBottom: '12px'
-            }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '12px' }}>
               <FunnelKpiCard label="Proposals" value={funnelData.proposals.value} trend={funnelData.proposals.trend} color="#06b6d4" />
               <FunnelKpiCard label="Won Deals" value={funnelData.wonDeals.value} trend={funnelData.wonDeals.trend} color="#10b981" />
               <FunnelKpiCard label="Win Rate %" value={`${funnelData.winRate.value}%`} trend={funnelData.winRate.trend} color="#10b981" />
             </div>
-
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '12px'
-            }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
               <FunnelKpiCard label="Ads Spend" value={formatCurrency(funnelData.adsSpend.value)} trend={funnelData.adsSpend.trend} />
               <FunnelKpiCard label="CAC" value={formatCurrency(funnelData.cac.value)} trend={funnelData.cac.trend} />
               <FunnelKpiCard label="ROAS" value={`${funnelData.roas.value}x`} trend={funnelData.roas.trend} color={funnelData.roas.value >= 1.5 ? '#10b981' : '#f59e0b'} />
             </div>
           </div>
 
-          {/* Right side: Funnel Visualization */}
-          <div style={{
-            background: '#0f172a',
-            borderRadius: '12px',
-            padding: '20px',
-            border: '1px solid #334155'
-          }}>
-            <div style={{
-              fontSize: '11px',
-              color: '#64748b',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-              marginBottom: '16px'
-            }}>
-              Sales Funnel
-            </div>
-
+          <div style={{ background: '#0f172a', borderRadius: '12px', padding: '20px', border: '1px solid #334155' }}>
+            <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '16px' }}>Sales Funnel</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {funnelStages.map((stage, idx) => {
                 const maxValue = funnelStages[0].value;
                 const percentage = (stage.value / maxValue) * 100;
-                const conversionRate = idx > 0 
-                  ? ((stage.value / funnelStages[idx - 1].value) * 100).toFixed(1)
-                  : 100;
+                const conversionRate = idx > 0 ? ((stage.value / funnelStages[idx - 1].value) * 100).toFixed(1) : 100;
                 
                 return (
                   <div key={stage.name}>
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: '6px'
-                    }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                       <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '500' }}>{stage.name}</span>
                       <span style={{ fontSize: '14px', color: '#f8fafc', fontWeight: '600' }}>{formatNumber(stage.value)}</span>
                     </div>
-                    <div style={{
-                      position: 'relative',
-                      height: '28px',
-                      background: '#1e293b',
-                      borderRadius: '6px',
-                      overflow: 'hidden'
-                    }}>
+                    <div style={{ position: 'relative', height: '28px', background: '#1e293b', borderRadius: '6px', overflow: 'hidden' }}>
                       <div style={{
                         width: `${percentage}%`,
                         height: '100%',
@@ -1772,19 +1284,10 @@ function App() {
               })}
             </div>
 
-            <div style={{
-              marginTop: '20px',
-              paddingTop: '16px',
-              borderTop: '1px solid #334155',
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '16px'
-            }}>
+            <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #334155', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>Lead → Won</div>
-                <div style={{ fontSize: '18px', fontWeight: '700', color: '#10b981' }}>
-                  {((funnelData.wonDeals.value / funnelData.leads.value) * 100).toFixed(1)}%
-                </div>
+                <div style={{ fontSize: '18px', fontWeight: '700', color: '#10b981' }}>{((funnelData.wonDeals.value / funnelData.leads.value) * 100).toFixed(1)}%</div>
               </div>
               <div>
                 <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>Deal Value</div>
@@ -1796,12 +1299,7 @@ function App() {
       </div>
 
       {/* Footer */}
-      <div style={{
-        marginTop: '32px',
-        textAlign: 'center',
-        fontSize: '12px',
-        color: '#475569'
-      }}>
+      <div style={{ marginTop: '32px', textAlign: 'center', fontSize: '12px', color: '#475569' }}>
         Built by AdRoq • Data source: GA4 + Semrush + HubSpot • Last update: {lastUpdated}
       </div>
     </div>
