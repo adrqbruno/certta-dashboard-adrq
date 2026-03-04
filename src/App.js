@@ -73,19 +73,25 @@ const GA4_MONTHLY_DATA = {
   },
   'Fev 2026': {
     metrics: {
-      sessions: { value: 5100, trend: -29.4 },
-      pageViews: { value: 6200, trend: -27.3 },
-      activeUsers: { value: 3975, trend: -27.1 },
-      newUserPercent: { value: 118, trend: -5.1 }
+      sessions: { value: 36600, trend: -25.2 },
+      pageViews: { value: 42300, trend: -30.5 },
+      activeUsers: { value: 27096, trend: -25.6 },
+      newUserPercent: { value: 127, trend: 3.6 }
     },
     dailyData: [
-      { date: '01', sessions: 1600, sessionsPrev: 900 },
-      { date: '05', sessions: 1850, sessionsPrev: 950 },
-      { date: '10', sessions: 1400, sessionsPrev: 850 },
-      { date: '15', sessions: 800, sessionsPrev: 450 },
-      { date: '20', sessions: 650, sessionsPrev: 400 },
-      { date: '22', sessions: 950, sessionsPrev: 600 },
-      { date: '24', sessions: 500, sessionsPrev: 900 }
+      { date: '01', sessions: 2113, sessionsPrev: 1800 },
+      { date: '03', sessions: 2805, sessionsPrev: 2200 },
+      { date: '05', sessions: 4499, sessionsPrev: 3500 },
+      { date: '07', sessions: 1102, sessionsPrev: 1400 },
+      { date: '10', sessions: 2098, sessionsPrev: 1900 },
+      { date: '12', sessions: 1805, sessionsPrev: 1600 },
+      { date: '15', sessions: 662, sessionsPrev: 1200 },
+      { date: '18', sessions: 857, sessionsPrev: 1100 },
+      { date: '20', sessions: 784, sessionsPrev: 1000 },
+      { date: '22', sessions: 414, sessionsPrev: 800 },
+      { date: '24', sessions: 869, sessionsPrev: 950 },
+      { date: '27', sessions: 699, sessionsPrev: 850 },
+      { date: '28', sessions: 394, sessionsPrev: 700 }
     ]
   },
   'Mar 2026': {
