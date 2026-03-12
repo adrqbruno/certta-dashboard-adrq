@@ -96,12 +96,24 @@ const GA4_MONTHLY_DATA = {
   },
   'Mar 2026': {
     metrics: {
-      sessions: { value: 0, trend: 0 },
-      pageViews: { value: 0, trend: 0 },
-      activeUsers: { value: 0, trend: 0 },
-      newUserPercent: { value: 0, trend: 0 }
+      sessions: { value: 8900, trend: 15.4 },
+      pageViews: { value: 10700, trend: 12.0 },
+      activeUsers: { value: 6916, trend: 15.5 },
+      newUserPercent: { value: 116, trend: -2.5 }
     },
-    dailyData: []
+    dailyData: [
+      { date: '01', sessions: 445, sessionsPrev: 400 },
+      { date: '02', sessions: 905, sessionsPrev: 750 },
+      { date: '03', sessions: 893, sessionsPrev: 800 },
+      { date: '04', sessions: 1071, sessionsPrev: 900 },
+      { date: '05', sessions: 955, sessionsPrev: 500 },
+      { date: '06', sessions: 870, sessionsPrev: 480 },
+      { date: '07', sessions: 486, sessionsPrev: 950 },
+      { date: '08', sessions: 667, sessionsPrev: 880 },
+      { date: '09', sessions: 885, sessionsPrev: 820 },
+      { date: '10', sessions: 896, sessionsPrev: 850 },
+      { date: '11', sessions: 809, sessionsPrev: 400 }
+    ]
   }
 };
 
