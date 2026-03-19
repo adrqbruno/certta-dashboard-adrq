@@ -96,23 +96,30 @@ const GA4_MONTHLY_DATA = {
   },
   'Mar 2026': {
     metrics: {
-      sessions: { value: 8900, trend: 15.4 },
-      pageViews: { value: 10700, trend: 12.0 },
-      activeUsers: { value: 6916, trend: 15.5 },
-      newUserPercent: { value: 116, trend: -2.5 }
+      sessions: { value: 15300, trend: 3.5 },
+      pageViews: { value: 18700, trend: 3.2 },
+      activeUsers: { value: 11892, trend: 5.5 },
+      newUserPercent: { value: 119, trend: -3.4 }
     },
     dailyData: [
       { date: '01', sessions: 445, sessionsPrev: 400 },
-      { date: '02', sessions: 905, sessionsPrev: 750 },
-      { date: '03', sessions: 893, sessionsPrev: 800 },
-      { date: '04', sessions: 1071, sessionsPrev: 900 },
-      { date: '05', sessions: 955, sessionsPrev: 500 },
-      { date: '06', sessions: 870, sessionsPrev: 480 },
-      { date: '07', sessions: 486, sessionsPrev: 950 },
-      { date: '08', sessions: 667, sessionsPrev: 880 },
-      { date: '09', sessions: 885, sessionsPrev: 820 },
-      { date: '10', sessions: 896, sessionsPrev: 850 },
-      { date: '11', sessions: 809, sessionsPrev: 400 }
+      { date: '02', sessions: 905, sessionsPrev: 850 },
+      { date: '03', sessions: 893, sessionsPrev: 900 },
+      { date: '04', sessions: 1071, sessionsPrev: 500 },
+      { date: '05', sessions: 955, sessionsPrev: 450 },
+      { date: '06', sessions: 870, sessionsPrev: 750 },
+      { date: '07', sessions: 486, sessionsPrev: 700 },
+      { date: '08', sessions: 667, sessionsPrev: 850 },
+      { date: '09', sessions: 885, sessionsPrev: 950 },
+      { date: '10', sessions: 896, sessionsPrev: 1000 },
+      { date: '11', sessions: 912, sessionsPrev: 800 },
+      { date: '12', sessions: 856, sessionsPrev: 750 },
+      { date: '13', sessions: 1551, sessionsPrev: 1800 },
+      { date: '14', sessions: 534, sessionsPrev: 600 },
+      { date: '15', sessions: 436, sessionsPrev: 500 },
+      { date: '16', sessions: 824, sessionsPrev: 900 },
+      { date: '17', sessions: 884, sessionsPrev: 850 },
+      { date: '18', sessions: 1327, sessionsPrev: 1100 }
     ]
   }
 };
