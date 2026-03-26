@@ -96,30 +96,38 @@ const GA4_MONTHLY_DATA = {
   },
   'Mar 2026': {
     metrics: {
-      sessions: { value: 15300, trend: 3.5 },
-      pageViews: { value: 18700, trend: 3.2 },
-      activeUsers: { value: 11892, trend: 5.5 },
-      newUserPercent: { value: 119, trend: -3.4 }
+      sessions: { value: 22600, trend: -27.0 },
+      pageViews: { value: 27700, trend: -23.5 },
+      activeUsers: { value: 18097, trend: -21.7 },
+      newUserPercent: { value: 118, trend: -6.3 }
     },
     dailyData: [
-      { date: '01', sessions: 445, sessionsPrev: 400 },
-      { date: '02', sessions: 905, sessionsPrev: 850 },
-      { date: '03', sessions: 893, sessionsPrev: 900 },
-      { date: '04', sessions: 1071, sessionsPrev: 500 },
-      { date: '05', sessions: 955, sessionsPrev: 450 },
-      { date: '06', sessions: 870, sessionsPrev: 750 },
-      { date: '07', sessions: 486, sessionsPrev: 700 },
-      { date: '08', sessions: 667, sessionsPrev: 850 },
-      { date: '09', sessions: 885, sessionsPrev: 950 },
-      { date: '10', sessions: 896, sessionsPrev: 1000 },
-      { date: '11', sessions: 912, sessionsPrev: 800 },
-      { date: '12', sessions: 856, sessionsPrev: 750 },
-      { date: '13', sessions: 1551, sessionsPrev: 1800 },
+      { date: '01', sessions: 445, sessionsPrev: 2113 },
+      { date: '02', sessions: 905, sessionsPrev: 2805 },
+      { date: '03', sessions: 893, sessionsPrev: 4499 },
+      { date: '04', sessions: 1071, sessionsPrev: 1102 },
+      { date: '05', sessions: 955, sessionsPrev: 2098 },
+      { date: '06', sessions: 870, sessionsPrev: 1805 },
+      { date: '07', sessions: 486, sessionsPrev: 662 },
+      { date: '08', sessions: 667, sessionsPrev: 857 },
+      { date: '09', sessions: 885, sessionsPrev: 784 },
+      { date: '10', sessions: 896, sessionsPrev: 414 },
+      { date: '11', sessions: 912, sessionsPrev: 869 },
+      { date: '12', sessions: 856, sessionsPrev: 699 },
+      { date: '13', sessions: 1551, sessionsPrev: 394 },
       { date: '14', sessions: 534, sessionsPrev: 600 },
       { date: '15', sessions: 436, sessionsPrev: 500 },
       { date: '16', sessions: 824, sessionsPrev: 900 },
       { date: '17', sessions: 884, sessionsPrev: 850 },
-      { date: '18', sessions: 1327, sessionsPrev: 1100 }
+      { date: '18', sessions: 1327, sessionsPrev: 1100 },
+      { date: '19', sessions: 977, sessionsPrev: 850 },
+      { date: '20', sessions: 1007, sessionsPrev: 900 },
+      { date: '21', sessions: 1077, sessionsPrev: 950 },
+      { date: '22', sessions: 1292, sessionsPrev: 1000 },
+      { date: '23', sessions: 1180, sessionsPrev: 1050 },
+      { date: '24', sessions: 1007, sessionsPrev: 950 },
+      { date: '25', sessions: 1010, sessionsPrev: 900 },
+      { date: '26', sessions: 224, sessionsPrev: 400 }
     ]
   }
 };
