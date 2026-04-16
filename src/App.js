@@ -4,19 +4,11 @@ import React, { useState, useEffect } from 'react';
 // CONFIGURAÇÃO - URLs DO GOOGLE SHEETS
 // ============================================
 const SHEETS_CONFIG = {
-  // SEO Competitors
   competitorsUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSlkIr00Ua6EYb3DLBehpFqWvdXd0LSexCXHLaIfRLCOIpG5nm5vOlZ4hKZqWwLXg/pub?gid=1560647113&single=true&output=csv',
   configUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSlkIr00Ua6EYb3DLBehpFqWvdXd0LSexCXHLaIfRLCOIpG5nm5vOlZ4hKZqWwLXg/pub?gid=109836250&single=true&output=csv',
-  
-  // GA4 Data (NEW - Dynamic)
   ga4Url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT8Pxasw_GpaTaTuoCnYyYobveoEsI4OB2SHPx5S77AhomwrTEHYfzt7xQ440hdq9kSmcVI-kyHRhRR/pub?gid=730913988&single=true&output=csv',
-  
-  // Smarketing KPIs (CRM Data)
   smarketingUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSIMqy3JIcjK5fi9BkPrTzskfgQs9BrZAwIk1UFZ4IBbqoFXYIOXhWSokH4JzUORg/pub?gid=1987761827&single=true&output=csv',
-  
-  // Executive Brief
   executiveBriefUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSlkIr00Ua6EYb3DLBehpFqWvdXd0LSexCXHLaIfRLCOIpG5nm5vOlZ4hKZqWwLXg/pub?gid=1672972077&single=true&output=csv',
-  
   useFallback: false
 };
 
@@ -31,20 +23,11 @@ const MONTH_NAMES_PT = {
 };
 
 function parseGA4CSV(csvText) {
-  // Remove BOM and normalize line endings
   const cleaned = csvText.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   const lines = cleaned.trim().split('\n').filter(l => l.trim().length > 0);
-  
-  if (lines.length < 2) {
-    console.warn('[GA4] CSV has less than 2 lines:', lines);
-    return [];
-  }
-
-  // Clean headers — remove BOM, quotes, whitespace
+  if (lines.length < 2) { console.warn('[GA4] CSV has less than 2 lines:', lines); return []; }
   const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, '').replace(/^\uFEFF/, ''));
   console.log('[GA4] Headers detected:', headers);
-
-  // Map common header variations
   const headerMap = {};
   headers.forEach((h, idx) => {
     const lower = h.toLowerCase().replace(/[_\s]/g, '');
@@ -56,65 +39,25 @@ function parseGA4CSV(csvText) {
     else if (lower === 'screenpageviews' || lower === 'pageviews' || lower === 'visualizacoesdepagina') headerMap.screenPageViews = idx;
   });
   console.log('[GA4] Header mapping:', headerMap);
-
-  if (headerMap.date === undefined || headerMap.sessions === undefined) {
-    console.error('[GA4] Missing required columns. Found headers:', headers);
-    return [];
-  }
-
+  if (headerMap.date === undefined || headerMap.sessions === undefined) { console.error('[GA4] Missing required columns. Found headers:', headers); return []; }
   const rows = [];
-
   for (let i = 1; i < lines.length; i++) {
     const values = lines[i].split(',').map(v => v.trim().replace(/^["']|["']$/g, ''));
-    
     let dateStr = values[headerMap.date] || '';
-    
-    // Handle different date formats
-    // YYYYMMDD → YYYY-MM-DD
-    if (/^\d{8}$/.test(dateStr)) {
-      dateStr = `${dateStr.slice(0, 4)}-${dateStr.slice(4, 6)}-${dateStr.slice(6, 8)}`;
-    }
-    // DD/MM/YYYY → YYYY-MM-DD
-    else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
-      const [dd, mm, yyyy] = dateStr.split('/');
-      dateStr = `${yyyy}-${mm}-${dd}`;
-    }
-    // MM/DD/YYYY → YYYY-MM-DD
-    else if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)) {
-      const parts = dateStr.split('/');
-      const mm = parts[0].padStart(2, '0');
-      const dd = parts[1].padStart(2, '0');
-      dateStr = `${parts[2]}-${mm}-${dd}`;
-    }
-
-    if (!dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
-      if (i <= 3) console.warn(`[GA4] Skipping row ${i}, invalid date: "${values[headerMap.date]}"`);
-      continue;
-    }
-
+    if (/^\d{8}$/.test(dateStr)) { dateStr = `${dateStr.slice(0, 4)}-${dateStr.slice(4, 6)}-${dateStr.slice(6, 8)}`; }
+    else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) { const [dd, mm, yyyy] = dateStr.split('/'); dateStr = `${yyyy}-${mm}-${dd}`; }
+    else if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)) { const parts = dateStr.split('/'); const mm = parts[0].padStart(2, '0'); const dd = parts[1].padStart(2, '0'); dateStr = `${parts[2]}-${mm}-${dd}`; }
+    if (!dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) { if (i <= 3) console.warn(`[GA4] Skipping row ${i}, invalid date: "${values[headerMap.date]}"`); continue; }
     const getNum = (key) => {
       if (headerMap[key] === undefined) return 0;
       const raw = values[headerMap[key]] || '0';
-      // Handle pt-BR decimals (comma as decimal separator)
       const normalized = raw.replace(/\./g, '').replace(',', '.');
       return parseFloat(normalized) || 0;
     };
-
-    rows.push({
-      date: dateStr,
-      activeUsers: Math.round(getNum('activeUsers')),
-      newUsers: Math.round(getNum('newUsers')),
-      engagementRate: getNum('engagementRate'),
-      sessions: Math.round(getNum('sessions')),
-      screenPageViews: Math.round(getNum('screenPageViews'))
-    });
+    rows.push({ date: dateStr, activeUsers: Math.round(getNum('activeUsers')), newUsers: Math.round(getNum('newUsers')), engagementRate: getNum('engagementRate'), sessions: Math.round(getNum('sessions')), screenPageViews: Math.round(getNum('screenPageViews')) });
   }
-
   console.log(`[GA4] Parsed ${rows.length} rows from ${lines.length - 1} data lines`);
-  if (rows.length > 0) {
-    console.log('[GA4] Date range:', rows[0].date, '→', rows[rows.length - 1].date);
-  }
-
+  if (rows.length > 0) { console.log('[GA4] Date range:', rows[0].date, '→', rows[rows.length - 1].date); }
   return rows;
 }
 
@@ -130,84 +73,45 @@ function getMonthIndex(dateStr) {
 }
 
 function processGA4Data(rows) {
-  // Group rows by month
   const monthGroups = {};
-
   rows.forEach(row => {
     const monthKey = getMonthKey(row.date);
     const monthIdx = getMonthIndex(row.date);
-    
-    if (!monthGroups[monthIdx]) {
-      monthGroups[monthIdx] = {
-        key: monthKey,
-        idx: monthIdx,
-        days: []
-      };
-    }
+    if (!monthGroups[monthIdx]) { monthGroups[monthIdx] = { key: monthKey, idx: monthIdx, days: [] }; }
     monthGroups[monthIdx].days.push(row);
   });
-
-  // Sort months chronologically
   const sortedMonthKeys = Object.keys(monthGroups).sort();
-
-  // Build processed data for each month
   const ga4Monthly = {};
   const availableMonths = [];
-
   sortedMonthKeys.forEach((monthIdx, i) => {
     const group = monthGroups[monthIdx];
     const monthKey = group.key;
     const days = group.days.sort((a, b) => a.date.localeCompare(b.date));
-
-    // Aggregate monthly totals
     const totalSessions = days.reduce((sum, d) => sum + d.sessions, 0);
     const totalPageViews = days.reduce((sum, d) => sum + d.screenPageViews, 0);
     const totalActiveUsers = days.reduce((sum, d) => sum + d.activeUsers, 0);
     const totalNewUsers = days.reduce((sum, d) => sum + d.newUsers, 0);
-    const newUserPercent = totalActiveUsers > 0
-      ? Math.round((totalNewUsers / totalActiveUsers) * 100)
-      : 0;
-
-    // Previous month for delta calculation
+    const newUserPercent = totalActiveUsers > 0 ? Math.round((totalNewUsers / totalActiveUsers) * 100) : 0;
     let prevSessions = 0, prevPageViews = 0, prevActiveUsers = 0, prevNewUserPercent = 0;
     let hasPrev = false;
-
     if (i > 0) {
       const prevMonthIdx = sortedMonthKeys[i - 1];
       const prevGroup = monthGroups[prevMonthIdx];
       const prevDays = prevGroup.days;
-      
       prevSessions = prevDays.reduce((sum, d) => sum + d.sessions, 0);
       prevPageViews = prevDays.reduce((sum, d) => sum + d.screenPageViews, 0);
       prevActiveUsers = prevDays.reduce((sum, d) => sum + d.activeUsers, 0);
       const prevTotalNewUsers = prevDays.reduce((sum, d) => sum + d.newUsers, 0);
-      prevNewUserPercent = prevActiveUsers > 0
-        ? Math.round((prevTotalNewUsers / prevActiveUsers) * 100)
-        : 0;
+      prevNewUserPercent = prevActiveUsers > 0 ? Math.round((prevTotalNewUsers / prevActiveUsers) * 100) : 0;
       hasPrev = true;
     }
-
-    const calcTrend = (current, previous) => {
-      if (!hasPrev || previous === 0) return 0;
-      return ((current - previous) / previous) * 100;
-    };
-
-    // Build daily data for sparkline
-    // For "previous" line, use the previous month's daily data aligned by day-of-month index
-    const prevMonthDays = i > 0
-      ? monthGroups[sortedMonthKeys[i - 1]].days.sort((a, b) => a.date.localeCompare(b.date))
-      : [];
-
+    const calcTrend = (current, previous) => { if (!hasPrev || previous === 0) return 0; return ((current - previous) / previous) * 100; };
+    const prevMonthDays = i > 0 ? monthGroups[sortedMonthKeys[i - 1]].days.sort((a, b) => a.date.localeCompare(b.date)) : [];
     const dailyData = days.map((day, dayIdx) => {
       const dayNum = day.date.split('-')[2];
       const prevDay = prevMonthDays[dayIdx];
-      return {
-        date: dayNum,
-        sessions: day.sessions,
-        sessionsPrev: prevDay ? prevDay.sessions : 0
-      };
+      return { date: dayNum, sessions: day.sessions, sessionsPrev: prevDay ? prevDay.sessions : 0 };
     });
-
     ga4Monthly[monthKey] = {
       metrics: {
         sessions: { value: totalSessions, trend: parseFloat(calcTrend(totalSessions, prevSessions).toFixed(1)) },
@@ -217,10 +121,8 @@ function processGA4Data(rows) {
       },
       dailyData
     };
-
     availableMonths.push(monthKey);
   });
-
   return { ga4Monthly, availableMonths };
 }
 
@@ -240,25 +142,28 @@ const FALLBACK_DATA = {
   ]
 };
 
+// ============================================
+// FUNNEL DATA — STATIC (valores reais Certta)
+// ============================================
 const FUNNEL_DATA = {
   period: "YTD 2026",
-  totalRevenue: { value: 666700, trend: 8.5 },
-  ltv: { value: 45000, trend: 12.3 },
-  arr: { value: 1200000, trend: 18.5 },
-  leads: { value: 1869, trend: 12.5 },
-  mql: { value: 1235, trend: 8.2 },
-  sql: { value: 262, trend: 15.1 },
-  proposals: { value: 75, trend: 5.6 },
-  wonDeals: { value: 33, trend: 2.1 },
-  winRate: { value: 29.3, trend: 1.4 },
-  adsSpend: { value: 416200, trend: -3.2 },
-  cac: { value: 2500, trend: -5.0 },
-  cpa: { value: 152.30, trend: 4.8 },
-  dealValue: { value: 666700, trend: 8.5 },
-  roas: { value: 1.6, trend: 15.0 }
+  // Score cards superiores
+  openOpp: { value: 285755, trend: 0 },
+  potencialMrr: { value: 142877, trend: 0 },
+  // Funil
+  leads: { value: 304, trend: 0 },
+  mql: { value: 173, trend: 0 },
+  sql: { value: 143, trend: 0 },
+  wonDeals: { value: 3, trend: 0 },
+  winRate: { value: parseFloat(((3 / 304) * 100).toFixed(1)), trend: 0 },
+  // Eficiência
+  adsSpend: { value: 0, trend: 0 },
+  cac: { value: 0, trend: 0 },
+  cpa: { value: 0, trend: 0 },
+  roas: { value: 0, trend: 0 }
 };
 
-// GA4 fallback — used only if Sheets fetch fails
+// GA4 fallback
 const GA4_MONTHLY_FALLBACK = {
   'Fev 2026': {
     metrics: {
@@ -297,26 +202,21 @@ const EXECUTIVE_BRIEF_FALLBACK = {
 };
 
 // ============================================
-// CSV PARSERS (existing)
+// CSV PARSERS
 // ============================================
 
 function parseCSV(csvText) {
   const lines = csvText.trim().split('\n');
   const headers = lines[0].split(',').map(h => h.trim());
   const data = [];
-  
   for (let i = 1; i < lines.length; i++) {
     const values = lines[i].split(',').map(v => v.trim());
     const row = {};
     headers.forEach((header, index) => {
       let value = values[index] || '';
-      if (['organicKeywords', 'organicTraffic', 'paidKeywords', 'paidTraffic', 'refDomains', 'authorityScore', 'authorityChange'].includes(header)) {
-        value = parseInt(value) || 0;
-      } else if (['keywordsTrend', 'trafficTrend', 'paidTrend', 'paidTrafficTrend', 'refTrend'].includes(header)) {
-        value = parseFloat(value) || 0;
-      } else if (['isOwn', 'highlight'].includes(header)) {
-        value = value.toUpperCase() === 'TRUE';
-      }
+      if (['organicKeywords', 'organicTraffic', 'paidKeywords', 'paidTraffic', 'refDomains', 'authorityScore', 'authorityChange'].includes(header)) { value = parseInt(value) || 0; }
+      else if (['keywordsTrend', 'trafficTrend', 'paidTrend', 'paidTrafficTrend', 'refTrend'].includes(header)) { value = parseFloat(value) || 0; }
+      else if (['isOwn', 'highlight'].includes(header)) { value = value.toUpperCase() === 'TRUE'; }
       row[header] = value;
     });
     data.push(row);
@@ -327,72 +227,34 @@ function parseCSV(csvText) {
 function parseSmarketingCSV(csvText) {
   const lines = csvText.trim().split('\n');
   const data = {};
-  
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i];
     if (line.startsWith('#') || line.startsWith('"#')) continue;
-    
     const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
     const metric = values[0];
     const value = values[1];
     const trend = values[2];
     const period = values[3];
-    
     if (!metric || metric.startsWith('#')) continue;
-    
     let parsedValue = value;
     let parsedTrend = parseFloat(trend) || 0;
-    
-    if (!isNaN(parseFloat(value))) {
-      parsedValue = parseFloat(value);
-    }
-    
-    data[metric] = {
-      value: parsedValue,
-      trend: parsedTrend,
-      period: period || ''
-    };
+    if (!isNaN(parseFloat(value))) { parsedValue = parseFloat(value); }
+    data[metric] = { value: parsedValue, trend: parsedTrend, period: period || '' };
   }
-  
   return data;
 }
 
 function parseExecutiveBriefCSV(csvText) {
   const lines = csvText.trim().split('\n');
   const data = {};
-  
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i];
     const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
     const field = values[0];
     const content = values[1];
-    
-    if (field) {
-      data[field] = content || '';
-    }
+    if (field) { data[field] = content || ''; }
   }
-  
   return data;
-}
-
-function convertSmarketingToFunnelData(sheetsData) {
-  return {
-    period: sheetsData.period?.value || "YTD 2026",
-    totalRevenue: { value: parseFloat(sheetsData.totalRevenue?.value) || 666700, trend: sheetsData.totalRevenue?.trend || 0 },
-    ltv: { value: parseFloat(sheetsData.ltv?.value) || 45000, trend: sheetsData.ltv?.trend || 0 },
-    arr: { value: parseFloat(sheetsData.arr?.value) || 1200000, trend: sheetsData.arr?.trend || 0 },
-    leads: { value: parseFloat(sheetsData.leads?.value) || 0, trend: sheetsData.leads?.trend || 0 },
-    mql: { value: parseFloat(sheetsData.mql?.value) || 0, trend: sheetsData.mql?.trend || 0 },
-    sql: { value: parseFloat(sheetsData.sql?.value) || 0, trend: sheetsData.sql?.trend || 0 },
-    proposals: { value: parseFloat(sheetsData.proposals?.value) || 0, trend: sheetsData.proposals?.trend || 0 },
-    wonDeals: { value: parseFloat(sheetsData.wonDeals?.value) || 0, trend: sheetsData.wonDeals?.trend || 0 },
-    winRate: { value: parseFloat(sheetsData.winRate?.value) || 0, trend: sheetsData.winRate?.trend || 0 },
-    adsSpend: { value: parseFloat(sheetsData.adsSpend?.value) || 0, trend: sheetsData.adsSpend?.trend || 0 },
-    cac: { value: parseFloat(sheetsData.cac?.value) || 0, trend: sheetsData.cac?.trend || 0 },
-    cpa: { value: parseFloat(sheetsData.cpa?.value) || 0, trend: sheetsData.cpa?.trend || 0 },
-    dealValue: { value: parseFloat(sheetsData.totalRevenue?.value) || 666700, trend: sheetsData.totalRevenue?.trend || 0 },
-    roas: { value: parseFloat(sheetsData.roas?.value) || 0, trend: sheetsData.roas?.trend || 0 }
-  };
 }
 
 // ============================================
@@ -407,148 +269,75 @@ const SparklineChart = ({ data, width = 500, height = 140 }) => {
       </div>
     );
   }
-
   const maxValue = Math.max(...data.map(d => Math.max(d.sessions, d.sessionsPrev)));
   const minValue = 0;
   const padding = { top: 20, right: 20, bottom: 30, left: 10 };
-  
   const chartWidth = width - padding.left - padding.right;
   const chartHeight = height - padding.top - padding.bottom;
-  
   const getX = (index) => padding.left + (index / (data.length - 1)) * chartWidth;
   const getY = (value) => padding.top + chartHeight - ((value - minValue) / (maxValue - minValue || 1)) * chartHeight;
-  
-  const createPath = (key) => {
-    return data.map((d, i) => {
-      const x = getX(i);
-      const y = getY(d[key]);
-      return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
-    }).join(' ');
-  };
-
+  const createPath = (key) => data.map((d, i) => { const x = getX(i); const y = getY(d[key]); return `${i === 0 ? 'M' : 'L'} ${x} ${y}`; }).join(' ');
   const createArea = (key) => {
-    const linePath = data.map((d, i) => {
-      const x = getX(i);
-      const y = getY(d[key]);
-      return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
-    }).join(' ');
-    
-    const lastX = getX(data.length - 1);
-    const firstX = getX(0);
-    const bottomY = padding.top + chartHeight;
-    
+    const linePath = data.map((d, i) => { const x = getX(i); const y = getY(d[key]); return `${i === 0 ? 'M' : 'L'} ${x} ${y}`; }).join(' ');
+    const lastX = getX(data.length - 1); const firstX = getX(0); const bottomY = padding.top + chartHeight;
     return `${linePath} L ${lastX} ${bottomY} L ${firstX} ${bottomY} Z`;
   };
-
-  // Show ~12-15 labels max to avoid clutter on months with 28-31 days
   const labelInterval = Math.max(1, Math.floor(data.length / 14));
-  
   return (
     <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet">
       {[0, 0.5, 1].map((ratio, i) => (
         <line key={i} x1={padding.left} y1={padding.top + chartHeight * (1 - ratio)} x2={width - padding.right} y2={padding.top + chartHeight * (1 - ratio)} stroke="#334155" strokeWidth="1" strokeDasharray="4,4" />
       ))}
-      
       <path d={createArea('sessionsPrev')} fill="#64748b" opacity="0.15" />
       <path d={createPath('sessionsPrev')} fill="none" stroke="#64748b" strokeWidth="2" opacity="0.5" />
       <path d={createArea('sessions')} fill="#3b82f6" opacity="0.2" />
       <path d={createPath('sessions')} fill="none" stroke="#3b82f6" strokeWidth="2.5" />
-      
-      {data.map((d, i) => (
-        <circle key={`current-${i}`} cx={getX(i)} cy={getY(d.sessions)} r="3.5" fill="#3b82f6" />
-      ))}
-      
-      {data.map((d, i) => (
-        i % labelInterval === 0 || i === data.length - 1 ? (
-          <text key={`label-${i}`} x={getX(i)} y={height - 8} textAnchor="middle" fill="#64748b" fontSize="10">
-            {d.date}
-          </text>
-        ) : null
-      ))}
-      
-      <text x={padding.left + 5} y={padding.top + 5} fill="#64748b" fontSize="9">
-        {(maxValue / 1000).toFixed(1)}K
-      </text>
-      <text x={padding.left + 5} y={padding.top + chartHeight - 5} fill="#64748b" fontSize="9">
-        0
-      </text>
+      {data.map((d, i) => (<circle key={`current-${i}`} cx={getX(i)} cy={getY(d.sessions)} r="3.5" fill="#3b82f6" />))}
+      {data.map((d, i) => (i % labelInterval === 0 || i === data.length - 1 ? (<text key={`label-${i}`} x={getX(i)} y={height - 8} textAnchor="middle" fill="#64748b" fontSize="10">{d.date}</text>) : null))}
+      <text x={padding.left + 5} y={padding.top + 5} fill="#64748b" fontSize="9">{(maxValue / 1000).toFixed(1)}K</text>
+      <text x={padding.left + 5} y={padding.top + chartHeight - 5} fill="#64748b" fontSize="9">0</text>
     </svg>
   );
 };
 
-const MonthSelector = ({ months, selected, onChange }) => {
-  return (
-    <div style={{
-      display: 'flex',
-      gap: '4px',
-      background: '#0f172a',
-      padding: '4px',
-      borderRadius: '10px',
-      border: '1px solid #334155',
-      flexWrap: 'wrap'
-    }}>
-      {months.map(month => (
-        <button
-          key={month}
-          onClick={() => onChange(month)}
-          style={{
-            padding: '6px 14px',
-            borderRadius: '6px',
-            border: 'none',
-            fontSize: '12px',
-            fontWeight: '500',
-            cursor: 'pointer',
-            transition: 'all 0.15s ease',
-            background: selected === month ? '#3b82f6' : 'transparent',
-            color: selected === month ? '#fff' : '#94a3b8'
-          }}
-        >
-          {month.split(' ')[0]}
-        </button>
-      ))}
-    </div>
-  );
-};
+const MonthSelector = ({ months, selected, onChange }) => (
+  <div style={{ display: 'flex', gap: '4px', background: '#0f172a', padding: '4px', borderRadius: '10px', border: '1px solid #334155', flexWrap: 'wrap' }}>
+    {months.map(month => (
+      <button key={month} onClick={() => onChange(month)} style={{ padding: '6px 14px', borderRadius: '6px', border: 'none', fontSize: '12px', fontWeight: '500', cursor: 'pointer', transition: 'all 0.15s ease', background: selected === month ? '#3b82f6' : 'transparent', color: selected === month ? '#fff' : '#94a3b8' }}>
+        {month.split(' ')[0]}
+      </button>
+    ))}
+  </div>
+);
 
 const ExecutiveBrief = ({ data }) => {
   const [copied, setCopied] = useState(false);
-
   const handleCopy = () => {
     const text = `📊 *Certta SEO Update - ${data.updatedAt}*\n\n✅ *${data.title}*\n• ${data.highlight1}\n• ${data.highlight2}\n\n⚠️ *Gap principal:*\n${data.gap}\n\n🎯 *Próximos passos:*\n• ${data.next1}\n• ${data.next2}\n• ${data.next3}`;
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+    navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
   };
-
   return (
     <div style={{ background: '#0f172a', borderRadius: '12px', padding: '20px', border: '1px solid #334155', height: '100%', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <div style={{ fontSize: '12px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '600' }}>
-          📋 Executive Brief
-        </div>
+        <div style={{ fontSize: '12px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '600' }}>📋 Executive Brief</div>
         <button onClick={handleCopy} style={{ background: copied ? '#10b981' : '#3b82f6', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '500', cursor: 'pointer', transition: 'all 0.15s ease' }}>
           {copied ? '✓ Copiado!' : '📤 Copiar'}
         </button>
       </div>
-
       <div style={{ flex: 1 }}>
         <div style={{ background: '#10b98120', borderLeft: '3px solid #10b981', padding: '12px', borderRadius: '0 8px 8px 0', marginBottom: '16px' }}>
           <div style={{ fontSize: '16px', fontWeight: '700', color: '#10b981', marginBottom: '8px' }}>{data.title}</div>
           <div style={{ fontSize: '13px', color: '#94a3b8', lineHeight: '1.5' }}>• {data.highlight1}<br />• {data.highlight2}</div>
         </div>
-
         <div style={{ background: '#ef444420', borderLeft: '3px solid #ef4444', padding: '12px', borderRadius: '0 8px 8px 0', marginBottom: '16px' }}>
           <div style={{ fontSize: '11px', fontWeight: '600', color: '#ef4444', marginBottom: '4px', textTransform: 'uppercase' }}>Gap Principal</div>
           <div style={{ fontSize: '13px', color: '#fca5a5' }}>{data.gap}</div>
         </div>
-
         <div style={{ background: '#3b82f620', borderLeft: '3px solid #3b82f6', padding: '12px', borderRadius: '0 8px 8px 0' }}>
           <div style={{ fontSize: '11px', fontWeight: '600', color: '#3b82f6', marginBottom: '8px', textTransform: 'uppercase' }}>Próximos Passos</div>
           <div style={{ fontSize: '13px', color: '#93c5fd', lineHeight: '1.6' }}>• {data.next1}<br />• {data.next2}<br />• {data.next3}</div>
         </div>
       </div>
-
       <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px solid #334155', fontSize: '11px', color: '#64748b', textAlign: 'right' }}>
         📅 Atualizado: {data.updatedAt}
       </div>
@@ -565,13 +354,11 @@ function App() {
   const [hoveredCompetitor, setHoveredCompetitor] = useState(null);
   const [competitors, setCompetitors] = useState(FALLBACK_DATA.competitors);
   const [lastUpdated, setLastUpdated] = useState(FALLBACK_DATA.lastUpdated);
-  const [funnelData, setFunnelData] = useState(FUNNEL_DATA);
+  const [funnelData] = useState(FUNNEL_DATA);
   const [executiveBrief, setExecutiveBrief] = useState(EXECUTIVE_BRIEF_FALLBACK);
   const [dataSource, setDataSource] = useState('fallback');
-  const [smarketingSource, setSmarketingSource] = useState('fallback');
   const [loading, setLoading] = useState(true);
 
-  // GA4 dynamic state
   const [ga4MonthlyData, setGa4MonthlyData] = useState(GA4_MONTHLY_FALLBACK);
   const [availableMonths, setAvailableMonths] = useState(['Fev 2026']);
   const [selectedMonth, setSelectedMonth] = useState('Fev 2026');
@@ -591,24 +378,17 @@ function App() {
     async function fetchData() {
       let loadedSomething = false;
 
-      // ── GA4 Data (NEW) ──
+      // GA4
       try {
         console.log('[GA4] Fetching from:', SHEETS_CONFIG.ga4Url);
         const ga4Response = await fetch(SHEETS_CONFIG.ga4Url);
-        
-        if (!ga4Response.ok) {
-          throw new Error(`HTTP ${ga4Response.status}: ${ga4Response.statusText}`);
-        }
-        
+        if (!ga4Response.ok) throw new Error(`HTTP ${ga4Response.status}: ${ga4Response.statusText}`);
         const ga4CSV = await ga4Response.text();
         console.log('[GA4] CSV length:', ga4CSV.length, '| First 200 chars:', ga4CSV.substring(0, 200));
-        
         const ga4Rows = parseGA4CSV(ga4CSV);
-        
         if (ga4Rows.length > 0) {
           const { ga4Monthly, availableMonths: months } = processGA4Data(ga4Rows);
           console.log('[GA4] Months found:', months);
-          
           if (Object.keys(ga4Monthly).length > 0 && months.length > 0) {
             setGa4MonthlyData(ga4Monthly);
             setAvailableMonths(months);
@@ -616,35 +396,21 @@ function App() {
             setGa4Source('sheets');
             loadedSomething = true;
             console.log('[GA4] ✅ Loaded successfully. Months:', months.join(', '));
-          } else {
-            console.warn('[GA4] Processing returned empty results');
-          }
-        } else {
-          console.warn('[GA4] Parser returned 0 rows');
-        }
-      } catch (error) {
-        console.error('[GA4] ❌ Failed to load:', error);
-        setGa4Source('fallback');
-      }
+          } else { console.warn('[GA4] Processing returned empty results'); }
+        } else { console.warn('[GA4] Parser returned 0 rows'); }
+      } catch (error) { console.error('[GA4] ❌ Failed to load:', error); setGa4Source('fallback'); }
 
-      // ── Competitors (SEO) ──
+      // Competitors
       try {
         if (!SHEETS_CONFIG.competitorsUrl.includes('COLE_AQUI')) {
           const competitorsResponse = await fetch(SHEETS_CONFIG.competitorsUrl);
           const competitorsCSV = await competitorsResponse.text();
           const competitorsData = parseCSV(competitorsCSV);
-          
-          if (competitorsData.length > 0) {
-            setCompetitors(competitorsData);
-            setDataSource('sheets');
-            loadedSomething = true;
-          }
+          if (competitorsData.length > 0) { setCompetitors(competitorsData); setDataSource('sheets'); loadedSomething = true; }
         }
-      } catch (error) {
-        console.error('Erro ao carregar competitors:', error);
-      }
+      } catch (error) { console.error('Erro ao carregar competitors:', error); }
 
-      // ── Config ──
+      // Config
       try {
         if (!SHEETS_CONFIG.configUrl.includes('COLE_AQUI')) {
           const configResponse = await fetch(SHEETS_CONFIG.configUrl);
@@ -653,48 +419,21 @@ function App() {
           const lastUpdatedRow = configData.find(row => row.key === 'lastUpdated');
           if (lastUpdatedRow) setLastUpdated(lastUpdatedRow.value);
         }
-      } catch (error) {
-        console.error('Erro ao carregar config:', error);
-      }
+      } catch (error) { console.error('Erro ao carregar config:', error); }
 
-      // ── Smarketing (CRM) ──
-      try {
-        if (SHEETS_CONFIG.smarketingUrl && !SHEETS_CONFIG.smarketingUrl.includes('COLE_AQUI')) {
-          const smarketingResponse = await fetch(SHEETS_CONFIG.smarketingUrl);
-          const smarketingCSV = await smarketingResponse.text();
-          const smarketingRaw = parseSmarketingCSV(smarketingCSV);
-          
-          if (Object.keys(smarketingRaw).length > 0) {
-            const convertedData = convertSmarketingToFunnelData(smarketingRaw);
-            setFunnelData(convertedData);
-            setSmarketingSource('sheets');
-            loadedSomething = true;
-          }
-        }
-      } catch (error) {
-        console.error('Erro ao carregar smarketing:', error);
-        setSmarketingSource('fallback');
-      }
-
-      // ── Executive Brief ──
+      // Executive Brief
       try {
         if (SHEETS_CONFIG.executiveBriefUrl && !SHEETS_CONFIG.executiveBriefUrl.includes('COLE_AQUI')) {
           const briefResponse = await fetch(SHEETS_CONFIG.executiveBriefUrl);
           const briefCSV = await briefResponse.text();
           const briefData = parseExecutiveBriefCSV(briefCSV);
-          
-          if (Object.keys(briefData).length > 0) {
-            setExecutiveBrief({ ...EXECUTIVE_BRIEF_FALLBACK, ...briefData });
-          }
+          if (Object.keys(briefData).length > 0) { setExecutiveBrief({ ...EXECUTIVE_BRIEF_FALLBACK, ...briefData }); }
         }
-      } catch (error) {
-        console.error('Erro ao carregar executive brief:', error);
-      }
+      } catch (error) { console.error('Erro ao carregar executive brief:', error); }
 
       if (!loadedSomething) setDataSource('fallback');
       setLoading(false);
     }
-
     fetchData();
   }, []);
 
@@ -704,7 +443,7 @@ function App() {
 
   const certtaData = competitors.find(c => c.domain === 'certta.ai') || {};
   const cafData = competitors.find(c => c.domain === 'caf.io') || {};
-  
+
   const certtaCombined = {
     organicKeywords: (certtaData.organicKeywords || 0) + (cafData.organicKeywords || 0),
     organicTraffic: (certtaData.organicTraffic || 0) + (cafData.organicTraffic || 0),
@@ -715,18 +454,10 @@ function App() {
 
   const spiderCompetitors = [
     { name: 'Certta (combined)', color: '#10b981', ...certtaCombined },
-    ...competitors
-      .filter(c => !c.isOwn && c.tier !== 'enterprise')
-      .slice(0, 4)
-      .map((c, idx) => ({
-        name: c.name,
-        color: ['#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899'][idx],
-        organicKeywords: c.organicKeywords,
-        organicTraffic: c.organicTraffic,
-        refDomains: c.refDomains,
-        authorityScore: c.authorityScore,
-        paidPresence: c.paidTraffic + c.paidKeywords
-      }))
+    ...competitors.filter(c => !c.isOwn && c.tier !== 'enterprise').slice(0, 4).map((c, idx) => ({
+      name: c.name, color: ['#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899'][idx],
+      organicKeywords: c.organicKeywords, organicTraffic: c.organicTraffic, refDomains: c.refDomains, authorityScore: c.authorityScore, paidPresence: c.paidTraffic + c.paidKeywords
+    }))
   ];
 
   const maxValues = {
@@ -738,8 +469,7 @@ function App() {
   };
 
   const normalizeData = (competitor) => ({
-    name: competitor.name,
-    color: competitor.color,
+    name: competitor.name, color: competitor.color,
     values: [
       (competitor.organicKeywords / maxValues.organicKeywords) * 100,
       (competitor.organicTraffic / maxValues.organicTraffic) * 100,
@@ -752,9 +482,7 @@ function App() {
   const normalizedData = spiderCompetitors.map(normalizeData);
   const axes = ['Organic Keywords', 'Organic Traffic', 'Ref Domains', 'Authority Score', 'Paid Presence'];
   const numAxes = axes.length;
-  const centerX = 220;
-  const centerY = 200;
-  const radius = 140;
+  const centerX = 220; const centerY = 200; const radius = 140;
 
   const getPoint = (value, axisIndex) => {
     const angle = (Math.PI * 2 * axisIndex) / numAxes - Math.PI / 2;
@@ -762,10 +490,7 @@ function App() {
     return { x: centerX + r * Math.cos(angle), y: centerY + r * Math.sin(angle) };
   };
 
-  const getPolygonPoints = (values) => values.map((value, i) => {
-    const point = getPoint(value, i);
-    return `${point.x},${point.y}`;
-  }).join(' ');
+  const getPolygonPoints = (values) => values.map((value, i) => { const point = getPoint(value, i); return `${point.x},${point.y}`; }).join(' ');
 
   const formatNumber = (num) => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
@@ -786,11 +511,7 @@ function App() {
     return '#ef4444';
   };
 
-  const getTrendIcon = (value) => {
-    if (value > 0) return '↑';
-    if (value < 0) return '↓';
-    return '—';
-  };
+  const getTrendIcon = (value) => { if (value > 0) return '↑'; if (value < 0) return '↓'; return '—'; };
 
   const getAuthorityColor = (score) => {
     if (score >= 60) return '#7c3aed';
@@ -811,15 +532,16 @@ function App() {
     return styles[tier] || styles.competitor;
   };
 
-  const migrationProgress = certtaData && cafData ? 
-    Math.round(((certtaData.organicTraffic || 0) / ((certtaData.organicTraffic || 0) + (cafData.organicTraffic || 1))) * 100) : 0;
+  const migrationProgress = certtaData && cafData
+    ? Math.round(((certtaData.organicTraffic || 0) / ((certtaData.organicTraffic || 0) + (cafData.organicTraffic || 1))) * 100)
+    : 0;
 
+  // ── Funil: 4 estágios com valores reais ──
   const funnelStages = [
-    { name: 'Leads', value: funnelData.leads.value, color: '#3b82f6' },
-    { name: 'MQL', value: funnelData.mql.value, color: '#f97316' },
-    { name: 'SQL', value: funnelData.sql.value, color: '#8b5cf6' },
-    { name: 'Proposals', value: funnelData.proposals.value, color: '#06b6d4' },
-    { name: 'Won', value: funnelData.wonDeals.value, color: '#10b981' }
+    { name: 'Leads',   value: funnelData.leads.value,    color: '#3b82f6' },
+    { name: 'MQL',     value: funnelData.mql.value,      color: '#f97316' },
+    { name: 'SQL',     value: funnelData.sql.value,      color: '#8b5cf6' },
+    { name: 'Deals',   value: funnelData.wonDeals.value, color: '#10b981' },
   ];
 
   // ============================================
@@ -854,16 +576,11 @@ function App() {
     </div>
   );
 
-  const FunnelKpiCard = ({ label, value, trend, color }) => (
+  const FunnelKpiCard = ({ label, value, color, sublabel }) => (
     <div style={{ background: '#0f172a', borderRadius: '10px', padding: '14px', border: '1px solid #334155' }}>
       <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>{label}</div>
-      <div style={{ fontSize: '22px', fontWeight: '700', color: color || '#f8fafc', marginBottom: '4px' }}>{value}</div>
-      {trend !== undefined && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: getTrendColor(trend), fontWeight: '500' }}>
-          <span>{getTrendIcon(trend)}</span>
-          <span>{Math.abs(trend).toFixed(1)}% MoM</span>
-        </div>
-      )}
+      <div style={{ fontSize: '26px', fontWeight: '700', color: color || '#f8fafc', marginBottom: '2px' }}>{value}</div>
+      {sublabel && <div style={{ fontSize: '11px', color: '#475569' }}>{sublabel}</div>}
     </div>
   );
 
@@ -873,15 +590,7 @@ function App() {
 
   if (loading) {
     return (
-      <div style={{
-        fontFamily: "'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif",
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: '#e2e8f0'
-      }}>
+      <div style={{ fontFamily: "'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif", background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#e2e8f0' }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: '24px', marginBottom: '16px' }}>⏳</div>
           <div>Carregando dados...</div>
@@ -895,46 +604,27 @@ function App() {
   // ============================================
 
   return (
-    <div style={{
-      fontFamily: "'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif",
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-      minHeight: '100vh',
-      padding: '32px',
-      color: '#e2e8f0'
-    }}>
+    <div style={{ fontFamily: "'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif", background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', minHeight: '100vh', padding: '32px', color: '#e2e8f0' }}>
+
       {/* Header */}
       <div style={{ marginBottom: '32px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px', flexWrap: 'wrap' }}>
-          <h1 style={{ fontSize: '28px', fontWeight: '600', color: '#f8fafc', margin: 0, letterSpacing: '-0.5px' }}>
-            Certta Performance Hub
-          </h1>
+          <h1 style={{ fontSize: '28px', fontWeight: '600', color: '#f8fafc', margin: 0, letterSpacing: '-0.5px' }}>Certta Performance Hub</h1>
           <span style={{ background: '#10b98120', color: '#10b981', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '500' }}>LIVE</span>
-          <span style={{
-            background: dataSource === 'sheets' ? '#3b82f620' : '#f59e0b20',
-            color: dataSource === 'sheets' ? '#3b82f6' : '#f59e0b',
-            padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: '500'
-          }}>
+          <span style={{ background: dataSource === 'sheets' ? '#3b82f620' : '#f59e0b20', color: dataSource === 'sheets' ? '#3b82f6' : '#f59e0b', padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: '500' }}>
             {dataSource === 'sheets' ? '📊 Google Sheets' : '📁 Dados Locais'}
           </span>
         </div>
-        <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>
-          Smarketing & SEO Performance Dashboard • Updated: {lastUpdated}
-        </p>
+        <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>Smarketing & SEO Performance Dashboard • Updated: {lastUpdated}</p>
       </div>
 
-      {/* ═══════════════════════════════════════════
-          GA4 WEBSITE ANALYTICS (NOW DYNAMIC)
-          ═══════════════════════════════════════════ */}
+      {/* GA4 */}
       <div style={{ background: '#1e293b', borderRadius: '16px', padding: '24px', marginBottom: '24px', border: '1px solid #334155' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span style={{ fontSize: '16px', fontWeight: '600', color: '#f8fafc' }}>Website Analytics</span>
-              <span style={{
-                background: ga4Source === 'sheets' ? '#10b98120' : '#f59e0b20',
-                color: ga4Source === 'sheets' ? '#10b981' : '#f59e0b',
-                padding: '2px 8px', borderRadius: '10px', fontSize: '10px', fontWeight: '500'
-              }}>
+              <span style={{ background: ga4Source === 'sheets' ? '#10b98120' : '#f59e0b20', color: ga4Source === 'sheets' ? '#10b981' : '#f59e0b', padding: '2px 8px', borderRadius: '10px', fontSize: '10px', fontWeight: '500' }}>
                 {ga4Source === 'sheets' ? '🔗 Live' : '📁 Fallback'}
               </span>
             </div>
@@ -942,7 +632,6 @@ function App() {
           </div>
           <MonthSelector months={availableMonths} selected={selectedMonth} onChange={setSelectedMonth} />
         </div>
-
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '24px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
             <GA4KpiCard label="Sessions" value={formatNumber(ga4Data.metrics.sessions.value)} trend={ga4Data.metrics.sessions.trend} trendLabel="vs. mês anterior" />
@@ -950,19 +639,12 @@ function App() {
             <GA4KpiCard label="Active Users" value={formatNumber(ga4Data.metrics.activeUsers.value)} trend={ga4Data.metrics.activeUsers.trend} trendLabel="vs. mês anterior" />
             <GA4KpiCard label="New Users %" value={`${ga4Data.metrics.newUserPercent.value}%`} trend={ga4Data.metrics.newUserPercent.trend} trendLabel="vs. mês anterior" />
           </div>
-
           <div style={{ background: '#0f172a', borderRadius: '12px', padding: '16px', border: '1px solid #334155' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Sessions Trend • {selectedMonth}</div>
               <div style={{ display: 'flex', gap: '16px', fontSize: '11px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <div style={{ width: '12px', height: '3px', background: '#3b82f6', borderRadius: '2px' }} />
-                  <span style={{ color: '#94a3b8' }}>Current</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <div style={{ width: '12px', height: '3px', background: '#64748b', borderRadius: '2px' }} />
-                  <span style={{ color: '#64748b' }}>Previous</span>
-                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '12px', height: '3px', background: '#3b82f6', borderRadius: '2px' }} /><span style={{ color: '#94a3b8' }}>Current</span></div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '12px', height: '3px', background: '#64748b', borderRadius: '2px' }} /><span style={{ color: '#64748b' }}>Previous</span></div>
               </div>
             </div>
             <SparklineChart data={ga4Data.dailyData} width={500} height={140} />
@@ -970,12 +652,8 @@ function App() {
         </div>
       </div>
 
-      {/* Migration Alert Card */}
-      <div style={{
-        background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
-        borderRadius: '16px', padding: '24px', marginBottom: '24px', border: '1px solid #4338ca40',
-        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px'
-      }}>
+      {/* Migration Alert */}
+      <div style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)', borderRadius: '16px', padding: '24px', marginBottom: '24px', border: '1px solid #4338ca40', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px' }}>
         <div>
           <div style={{ fontSize: '12px', color: '#a5b4fc', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Domain Migration Status</div>
           <div style={{ fontSize: '32px', fontWeight: '700', color: '#f8fafc', marginBottom: '4px' }}>{migrationProgress}%</div>
@@ -984,13 +662,11 @@ function App() {
             <div style={{ width: `${migrationProgress}%`, height: '100%', background: 'linear-gradient(90deg, #10b981, #34d399)', borderRadius: '8px', transition: 'width 0.5s ease' }} />
           </div>
         </div>
-
         <div style={{ borderLeft: '1px solid #4338ca40', paddingLeft: '24px' }}>
           <div style={{ fontSize: '12px', color: '#fca5a5', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>⚠️ Legacy Decay (caf.io)</div>
           <div style={{ fontSize: '32px', fontWeight: '700', color: '#ef4444', marginBottom: '4px' }}>{cafData.trafficTrend || 0}%</div>
           <div style={{ fontSize: '13px', color: '#94a3b8' }}>Organic traffic MoM</div>
         </div>
-
         <div style={{ borderLeft: '1px solid #4338ca40', paddingLeft: '24px' }}>
           <div style={{ fontSize: '12px', color: '#86efac', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>🚀 New Domain Growth (certta.ai)</div>
           <div style={{ fontSize: '32px', fontWeight: '700', color: '#10b981', marginBottom: '4px' }}>+{certtaData.trafficTrend || 0}%</div>
@@ -998,43 +674,18 @@ function App() {
         </div>
       </div>
 
-      {/* Spider Chart Section */}
+      {/* Spider Chart */}
       <div style={{ background: '#1e293b', borderRadius: '16px', padding: '24px', marginBottom: '24px', border: '1px solid #334155' }}>
         <div style={{ fontSize: '16px', fontWeight: '600', color: '#f8fafc', marginBottom: '20px' }}>Competitive Positioning Radar</div>
-        
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 400px) 1fr', gap: '32px', alignItems: 'start' }}>
           <svg width="100%" viewBox="0 0 440 400" style={{ maxWidth: '440px' }}>
-            {[20, 40, 60, 80, 100].map((percent, i) => (
-              <circle key={i} cx={centerX} cy={centerY} r={(percent / 100) * radius} fill="none" stroke="#334155" strokeWidth="1" strokeDasharray={i === 4 ? "none" : "4,4"} />
-            ))}
-            {axes.map((_, i) => {
-              const point = getPoint(100, i);
-              return <line key={i} x1={centerX} y1={centerY} x2={point.x} y2={point.y} stroke="#334155" strokeWidth="1" />;
-            })}
-            {axes.map((label, i) => {
-              const point = getPoint(120, i);
-              const isTop = i === 0;
-              const isBottom = i === Math.floor(numAxes / 2);
-              return (
-                <text key={i} x={point.x} y={point.y} textAnchor="middle" dominantBaseline={isTop ? "auto" : isBottom ? "hanging" : "middle"} fill="#94a3b8" fontSize="11" fontWeight="500">
-                  {label}
-                </text>
-              );
-            })}
-            {normalizedData.map((competitor, idx) => (
-              <polygon key={competitor.name} points={getPolygonPoints(competitor.values)} fill={`${competitor.color}15`} stroke={competitor.color} strokeWidth={hoveredCompetitor === idx || hoveredCompetitor === null ? "2" : "1"} opacity={hoveredCompetitor === null || hoveredCompetitor === idx ? 1 : 0.3} style={{ transition: 'all 0.2s ease' }} />
-            ))}
-            {normalizedData.map((competitor, idx) => (
-              competitor.values.map((value, i) => {
-                const point = getPoint(value, i);
-                return <circle key={`${competitor.name}-${i}`} cx={point.x} cy={point.y} r={hoveredCompetitor === idx ? 5 : 4} fill={competitor.color} opacity={hoveredCompetitor === null || hoveredCompetitor === idx ? 1 : 0.3} style={{ transition: 'all 0.2s ease' }} />;
-              })
-            ))}
-            {[25, 50, 75, 100].map((percent, i) => (
-              <text key={i} x={centerX + 5} y={centerY - (percent / 100) * radius} fill="#64748b" fontSize="9" dominantBaseline="middle">{percent}%</text>
-            ))}
+            {[20, 40, 60, 80, 100].map((percent, i) => (<circle key={i} cx={centerX} cy={centerY} r={(percent / 100) * radius} fill="none" stroke="#334155" strokeWidth="1" strokeDasharray={i === 4 ? "none" : "4,4"} />))}
+            {axes.map((_, i) => { const point = getPoint(100, i); return <line key={i} x1={centerX} y1={centerY} x2={point.x} y2={point.y} stroke="#334155" strokeWidth="1" />; })}
+            {axes.map((label, i) => { const point = getPoint(120, i); const isTop = i === 0; const isBottom = i === Math.floor(numAxes / 2); return (<text key={i} x={point.x} y={point.y} textAnchor="middle" dominantBaseline={isTop ? "auto" : isBottom ? "hanging" : "middle"} fill="#94a3b8" fontSize="11" fontWeight="500">{label}</text>); })}
+            {normalizedData.map((competitor, idx) => (<polygon key={competitor.name} points={getPolygonPoints(competitor.values)} fill={`${competitor.color}15`} stroke={competitor.color} strokeWidth={hoveredCompetitor === idx || hoveredCompetitor === null ? "2" : "1"} opacity={hoveredCompetitor === null || hoveredCompetitor === idx ? 1 : 0.3} style={{ transition: 'all 0.2s ease' }} />))}
+            {normalizedData.map((competitor, idx) => (competitor.values.map((value, i) => { const point = getPoint(value, i); return <circle key={`${competitor.name}-${i}`} cx={point.x} cy={point.y} r={hoveredCompetitor === idx ? 5 : 4} fill={competitor.color} opacity={hoveredCompetitor === null || hoveredCompetitor === idx ? 1 : 0.3} style={{ transition: 'all 0.2s ease' }} />; })))}
+            {[25, 50, 75, 100].map((percent, i) => (<text key={i} x={centerX + 5} y={centerY - (percent / 100) * radius} fill="#64748b" fontSize="9" dominantBaseline="middle">{percent}%</text>))}
           </svg>
-
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: '24px', alignItems: 'start' }}>
               <div>
@@ -1048,7 +699,6 @@ function App() {
                   ))}
                 </div>
               </div>
-
               <div>
                 <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>🎯 Certta Combined Metrics</div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px' }}>
@@ -1059,32 +709,24 @@ function App() {
                 </div>
               </div>
             </div>
-
             <div style={{ background: '#0f172a', borderRadius: '12px', padding: '16px', border: '1px solid #334155' }}>
               <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>📊 Radar Analysis</div>
               <div style={{ fontSize: '13px', color: '#94a3b8', lineHeight: '1.7' }}>
-                <p style={{ margin: '0 0 10px 0' }}>
-                  <strong style={{ color: '#10b981' }}>Certta's strength:</strong> Ref Domains ({formatNumber(certtaCombined.refDomains)} combined) competitive with market leaders due to caf.io legacy backlinks.
-                </p>
-                <p style={{ margin: '0 0 10px 0' }}>
-                  <strong style={{ color: '#ef4444' }}>Critical gaps:</strong> Organic Traffic {Math.round(maxValues.organicTraffic / (certtaCombined.organicTraffic || 1))}x below market leader. Volume metrics take 6-12 months to build.
-                </p>
-                <p style={{ margin: 0 }}>
-                  <strong style={{ color: '#f59e0b' }}>Opportunity:</strong> Jumio has high authority (42) but low BR traffic — international player without local SEO. Certta can capture BR-specific demand.
-                </p>
+                <p style={{ margin: '0 0 10px 0' }}><strong style={{ color: '#10b981' }}>Certta's strength:</strong> Ref Domains ({formatNumber(certtaCombined.refDomains)} combined) competitive with market leaders due to caf.io legacy backlinks.</p>
+                <p style={{ margin: '0 0 10px 0' }}><strong style={{ color: '#ef4444' }}>Critical gaps:</strong> Organic Traffic {Math.round(maxValues.organicTraffic / (certtaCombined.organicTraffic || 1))}x below market leader. Volume metrics take 6-12 months to build.</p>
+                <p style={{ margin: 0 }}><strong style={{ color: '#f59e0b' }}>Opportunity:</strong> Jumio has high authority (42) but low BR traffic — international player without local SEO. Certta can capture BR-specific demand.</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Competitive Metrics Table + Executive Brief */}
+      {/* Competitive Table + Executive Brief */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '24px', marginBottom: '24px' }}>
         <div style={{ background: '#1e293b', borderRadius: '16px', overflow: 'hidden', border: '1px solid #334155' }}>
           <div style={{ padding: '16px 20px', borderBottom: '1px solid #334155' }}>
             <div style={{ fontSize: '16px', fontWeight: '600', color: '#f8fafc' }}>Detailed Competitive Metrics</div>
           </div>
-          
           <div style={{ display: 'grid', gridTemplateColumns: '140px repeat(5, 1fr)', gap: '4px', padding: '12px 20px', background: '#0f172a', borderBottom: '1px solid #334155', fontSize: '10px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
             <div>Domain</div>
             <div style={{ textAlign: 'right' }}>KWs</div>
@@ -1093,16 +735,10 @@ function App() {
             <div style={{ textAlign: 'right' }}>Refs</div>
             <div style={{ textAlign: 'center' }}>Auth</div>
           </div>
-
           {competitors.map((company, index) => {
             const tierStyle = getTierBadge(company.tier);
             return (
-              <div key={company.domain} onMouseEnter={() => setHoveredRow(index)} onMouseLeave={() => setHoveredRow(null)} style={{
-                display: 'grid', gridTemplateColumns: '140px repeat(5, 1fr)', gap: '4px', padding: '12px 20px',
-                borderBottom: index < competitors.length - 1 ? '1px solid #334155' : 'none',
-                background: company.highlight ? 'linear-gradient(90deg, #10b98110 0%, transparent 100%)' : company.isOwn && !company.highlight ? 'linear-gradient(90deg, #ef444410 0%, transparent 100%)' : hoveredRow === index ? '#334155' : 'transparent',
-                transition: 'background 0.15s ease', alignItems: 'center'
-              }}>
+              <div key={company.domain} onMouseEnter={() => setHoveredRow(index)} onMouseLeave={() => setHoveredRow(null)} style={{ display: 'grid', gridTemplateColumns: '140px repeat(5, 1fr)', gap: '4px', padding: '12px 20px', borderBottom: index < competitors.length - 1 ? '1px solid #334155' : 'none', background: company.highlight ? 'linear-gradient(90deg, #10b98110 0%, transparent 100%)' : company.isOwn && !company.highlight ? 'linear-gradient(90deg, #ef444410 0%, transparent 100%)' : hoveredRow === index ? '#334155' : 'transparent', transition: 'background 0.15s ease', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontWeight: '600', color: company.highlight ? '#10b981' : company.isOwn ? '#f87171' : '#f8fafc', fontSize: '13px' }}>{company.name}</div>
                   <span style={{ background: tierStyle.bg, color: tierStyle.color, padding: '1px 6px', borderRadius: '8px', fontSize: '9px', fontWeight: '500' }}>{tierStyle.label}</span>
@@ -1117,9 +753,7 @@ function App() {
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontWeight: '600', color: company.paidTraffic === 0 ? '#475569' : '#f8fafc', fontSize: '13px' }}>{company.paidTraffic === 0 ? '—' : formatNumber(company.paidTraffic)}</div>
-                  {company.paidTraffic > 0 && (
-                    <div style={{ fontSize: '10px', color: getTrendColor(company.paidTrafficTrend), fontWeight: '500' }}>{getTrendIcon(company.paidTrafficTrend)} {Math.abs(company.paidTrafficTrend).toFixed(0)}%</div>
-                  )}
+                  {company.paidTraffic > 0 && (<div style={{ fontSize: '10px', color: getTrendColor(company.paidTrafficTrend), fontWeight: '500' }}>{getTrendIcon(company.paidTrafficTrend)} {Math.abs(company.paidTrafficTrend).toFixed(0)}%</div>)}
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontWeight: '600', color: '#f8fafc', fontSize: '13px' }}>{formatNumber(company.refDomains)}</div>
@@ -1129,19 +763,18 @@ function App() {
                   <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: `conic-gradient(${getAuthorityColor(company.authorityScore)} ${company.authorityScore * 3.6}deg, #334155 0deg)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '11px', color: getAuthorityColor(company.authorityScore) }}>{company.authorityScore}</div>
                   </div>
-                  {company.authorityChange !== 0 && (
-                    <div style={{ fontSize: '9px', fontWeight: '600', color: company.authorityChange > 0 ? '#10b981' : '#ef4444' }}>{company.authorityChange > 0 ? '+' : ''}{company.authorityChange}</div>
-                  )}
+                  {company.authorityChange !== 0 && (<div style={{ fontSize: '9px', fontWeight: '600', color: company.authorityChange > 0 ? '#10b981' : '#ef4444' }}>{company.authorityChange > 0 ? '+' : ''}{company.authorityChange}</div>)}
                 </div>
               </div>
             );
           })}
         </div>
-
         <ExecutiveBrief data={executiveBrief} />
       </div>
 
-      {/* Smarketing Funnel Section */}
+      {/* ═══════════════════════════════════════════
+          SMARKETING FUNNEL — VALORES REAIS CERTTA
+          ═══════════════════════════════════════════ */}
       <div style={{ background: '#1e293b', borderRadius: '16px', padding: '24px', marginBottom: '24px', border: '1px solid #334155' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <div>
@@ -1149,78 +782,78 @@ function App() {
             <div style={{ fontSize: '12px', color: '#64748b' }}>Full-funnel results: from lead generation to closed revenue</div>
           </div>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <span style={{ background: smarketingSource === 'sheets' ? '#10b98120' : '#f59e0b20', color: smarketingSource === 'sheets' ? '#10b981' : '#f59e0b', padding: '4px 10px', borderRadius: '12px', fontSize: '10px', fontWeight: '500' }}>
-              {smarketingSource === 'sheets' ? '🔗 Live Data' : '📁 Demo'}
-            </span>
             <span style={{ background: '#06b6d420', color: '#06b6d4', padding: '4px 12px', borderRadius: '12px', fontSize: '11px', fontWeight: '500' }}>{funnelData.period}</span>
           </div>
         </div>
 
-        {/* Score Cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
+        {/* Score Cards — Open Opp + Potencial MRR */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '24px' }}>
           <div style={{ background: 'linear-gradient(135deg, #065f46 0%, #047857 100%)', borderRadius: '12px', padding: '20px', border: '1px solid #10b98140' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-              <span style={{ fontSize: '20px' }}>💰</span>
-              <span style={{ fontSize: '11px', color: '#a7f3d0', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '500' }}>Total Revenue</span>
+              <span style={{ fontSize: '20px' }}>💼</span>
+              <span style={{ fontSize: '11px', color: '#a7f3d0', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '500' }}>Open Opportunities</span>
             </div>
-            <div style={{ fontSize: '32px', fontWeight: '700', color: '#fff', marginBottom: '8px' }}>{formatCurrency(funnelData.totalRevenue.value)}</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
-              <span style={{ color: '#6ee7b7', fontWeight: '600' }}>{getTrendIcon(funnelData.totalRevenue.trend)} {Math.abs(funnelData.totalRevenue.trend).toFixed(1)}%</span>
-              <span style={{ color: '#a7f3d0' }}>vs. período anterior</span>
-            </div>
+            <div style={{ fontSize: '36px', fontWeight: '700', color: '#fff', marginBottom: '6px' }}>R$ 285.755</div>
+            <div style={{ fontSize: '13px', color: '#a7f3d0' }}>Pipeline total em aberto</div>
           </div>
 
           <div style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)', borderRadius: '12px', padding: '20px', border: '1px solid #3b82f640' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-              <span style={{ fontSize: '20px' }}>👤</span>
-              <span style={{ fontSize: '11px', color: '#bfdbfe', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '500' }}>Lifetime Value</span>
-            </div>
-            <div style={{ fontSize: '32px', fontWeight: '700', color: '#fff', marginBottom: '8px' }}>{formatCurrency(funnelData.ltv.value)}</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
-              <span style={{ color: '#93c5fd', fontWeight: '600' }}>{getTrendIcon(funnelData.ltv.trend)} {Math.abs(funnelData.ltv.trend).toFixed(1)}%</span>
-              <span style={{ color: '#bfdbfe' }}>vs. período anterior</span>
-            </div>
-          </div>
-
-          <div style={{ background: 'linear-gradient(135deg, #581c87 0%, #7c3aed 100%)', borderRadius: '12px', padding: '20px', border: '1px solid #8b5cf640' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
               <span style={{ fontSize: '20px' }}>📈</span>
-              <span style={{ fontSize: '11px', color: '#e9d5ff', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '500' }}>ARR</span>
+              <span style={{ fontSize: '11px', color: '#bfdbfe', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '500' }}>Potencial MRR</span>
             </div>
-            <div style={{ fontSize: '32px', fontWeight: '700', color: '#fff', marginBottom: '8px' }}>{formatCurrency(funnelData.arr.value)}</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
-              <span style={{ color: '#c4b5fd', fontWeight: '600' }}>{getTrendIcon(funnelData.arr.trend)} {Math.abs(funnelData.arr.trend).toFixed(1)}%</span>
-              <span style={{ color: '#e9d5ff' }}>vs. período anterior</span>
-            </div>
+            <div style={{ fontSize: '36px', fontWeight: '700', color: '#fff', marginBottom: '6px' }}>R$ 142.877</div>
+            <div style={{ fontSize: '13px', color: '#bfdbfe' }}>Receita recorrente potencial</div>
           </div>
         </div>
 
+        {/* Funil + KPIs */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-          <div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '12px' }}>
-              <FunnelKpiCard label="Leads" value={formatNumber(funnelData.leads.value)} trend={funnelData.leads.trend} color="#3b82f6" />
-              <FunnelKpiCard label="MQL" value={formatNumber(funnelData.mql.value)} trend={funnelData.mql.trend} color="#f97316" />
-              <FunnelKpiCard label="SQL" value={formatNumber(funnelData.sql.value)} trend={funnelData.sql.trend} color="#8b5cf6" />
+
+          {/* KPI Cards do funil */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+              <FunnelKpiCard label="Leads" value="304" color="#3b82f6" sublabel="Total gerado" />
+              <FunnelKpiCard label="MQL" value="173" color="#f97316" sublabel={`${((173/304)*100).toFixed(1)}% dos leads`} />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '12px' }}>
-              <FunnelKpiCard label="Proposals" value={funnelData.proposals.value} trend={funnelData.proposals.trend} color="#06b6d4" />
-              <FunnelKpiCard label="Won Deals" value={funnelData.wonDeals.value} trend={funnelData.wonDeals.trend} color="#10b981" />
-              <FunnelKpiCard label="Win Rate %" value={`${funnelData.winRate.value}%`} trend={funnelData.winRate.trend} color="#10b981" />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+              <FunnelKpiCard label="SQL" value="143" color="#8b5cf6" sublabel={`${((143/173)*100).toFixed(1)}% dos MQL`} />
+              <FunnelKpiCard label="Deals" value="3" color="#10b981" sublabel={`Win rate ${((3/304)*100).toFixed(1)}%`} />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-              <FunnelKpiCard label="Ads Spend" value={formatCurrency(funnelData.adsSpend.value)} trend={funnelData.adsSpend.trend} />
-              <FunnelKpiCard label="CAC" value={formatCurrency(funnelData.cac.value)} trend={funnelData.cac.trend} />
-              <FunnelKpiCard label="ROAS" value={`${funnelData.roas.value}x`} trend={funnelData.roas.trend} color={funnelData.roas.value >= 1.5 ? '#10b981' : '#f59e0b'} />
+
+            {/* Conversões resumidas */}
+            <div style={{ background: '#0f172a', borderRadius: '10px', padding: '16px', border: '1px solid #334155' }}>
+              <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>Taxas de Conversão</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {[
+                  { label: 'Lead → MQL', value: ((173/304)*100).toFixed(1), color: '#f97316' },
+                  { label: 'MQL → SQL',  value: ((143/173)*100).toFixed(1), color: '#8b5cf6' },
+                  { label: 'SQL → Deal', value: ((3/143)*100).toFixed(1),   color: '#10b981' },
+                  { label: 'Lead → Deal',value: ((3/304)*100).toFixed(1),   color: '#06b6d4' },
+                ].map(r => (
+                  <div key={r.label} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '12px', color: '#94a3b8', width: '90px', flexShrink: 0 }}>{r.label}</span>
+                    <div style={{ flex: 1, background: '#1e293b', borderRadius: '4px', height: '20px', overflow: 'hidden' }}>
+                      <div style={{ width: `${Math.min(parseFloat(r.value), 100)}%`, height: '100%', background: r.color, borderRadius: '4px', display: 'flex', alignItems: 'center', paddingLeft: '8px', minWidth: '40px' }}>
+                        <span style={{ fontSize: '10px', fontWeight: '700', color: '#fff', whiteSpace: 'nowrap' }}>{r.value}%</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
+          {/* Funil visual */}
           <div style={{ background: '#0f172a', borderRadius: '12px', padding: '20px', border: '1px solid #334155' }}>
             <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '16px' }}>Sales Funnel</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {funnelStages.map((stage, idx) => {
                 const maxVal = funnelStages[0].value;
                 const percentage = (stage.value / maxVal) * 100;
-                const conversionRate = idx > 0 ? ((stage.value / funnelStages[idx - 1].value) * 100).toFixed(1) : 100;
+                const conversionRate = idx > 0
+                  ? ((stage.value / funnelStages[idx - 1].value) * 100).toFixed(1)
+                  : '100';
                 return (
                   <div key={stage.name}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
@@ -1228,7 +861,7 @@ function App() {
                       <span style={{ fontSize: '14px', color: '#f8fafc', fontWeight: '600' }}>{formatNumber(stage.value)}</span>
                     </div>
                     <div style={{ position: 'relative', height: '28px', background: '#1e293b', borderRadius: '6px', overflow: 'hidden' }}>
-                      <div style={{ width: `${percentage}%`, height: '100%', background: `linear-gradient(90deg, ${stage.color}, ${stage.color}cc)`, borderRadius: '6px', display: 'flex', alignItems: 'center', paddingLeft: '10px', transition: 'width 0.5s ease' }}>
+                      <div style={{ width: `${percentage}%`, height: '100%', background: `linear-gradient(90deg, ${stage.color}, ${stage.color}cc)`, borderRadius: '6px', display: 'flex', alignItems: 'center', paddingLeft: '10px', transition: 'width 0.5s ease', minWidth: stage.value > 0 ? '50px' : '0' }}>
                         <span style={{ fontSize: '11px', fontWeight: '600', color: '#fff' }}>{conversionRate}%</span>
                       </div>
                     </div>
@@ -1237,14 +870,23 @@ function App() {
               })}
             </div>
 
+            {/* Resumo financeiro */}
             <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #334155', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
-                <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>Lead → Won</div>
-                <div style={{ fontSize: '18px', fontWeight: '700', color: '#10b981' }}>{((funnelData.wonDeals.value / (funnelData.leads.value || 1)) * 100).toFixed(1)}%</div>
+                <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>Lead → Deal</div>
+                <div style={{ fontSize: '20px', fontWeight: '700', color: '#10b981' }}>{((3 / 304) * 100).toFixed(2)}%</div>
               </div>
               <div>
-                <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>Deal Value</div>
-                <div style={{ fontSize: '18px', fontWeight: '700', color: '#f8fafc' }}>{formatCurrency(funnelData.dealValue.value)}</div>
+                <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>Open Opp</div>
+                <div style={{ fontSize: '20px', fontWeight: '700', color: '#f8fafc' }}>R$ 285.7K</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>Deals Fechados</div>
+                <div style={{ fontSize: '20px', fontWeight: '700', color: '#10b981' }}>3</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>Pot. MRR</div>
+                <div style={{ fontSize: '20px', fontWeight: '700', color: '#3b82f6' }}>R$ 142.9K</div>
               </div>
             </div>
           </div>
