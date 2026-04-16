@@ -63,13 +63,19 @@ function processGA4Data(rows) {
     if (i>0) {
       const pd=mg[sorted[i-1]].days;
       pS=pd.reduce((s,d)=>s+d.sessions,0); pP=pd.reduce((s,d)=>s+d.screenPageViews,0);
-      pA=pd.reduce((s,d)=>s+d.activeUsers,0); const pN=pd.reduce((s,d)=>s+d.newUsers,0);
+      pA=pd.reduce((s,d)=>s+d.activeUsers,0);
+      const pN=pd.reduce((s,d)=>s+d.newUsers,0);
       pNP=pA>0?Math.round((pN/pA)*100):0; hasPrev=true;
     }
     const tr=(c,p)=>(!hasPrev||p===0)?0:parseFloat(((c-p)/p*100).toFixed(1));
     const prevArr=i>0?mg[sorted[i-1]].days.sort((a,b)=>a.date.localeCompare(b.date)):[];
     ga4Monthly[key]={
-      metrics:{ sessions:{value:tS,trend:tr(tS,pS)}, pageViews:{value:tP,trend:tr(tP,pP)}, activeUsers:{value:tA,trend:tr(tA,pA)}, newUserPercent:{value:nPct,trend:tr(nPct,pNP)} },
+      metrics:{
+        sessions:{value:tS,trend:tr(tS,pS)},
+        pageViews:{value:tP,trend:tr(tP,pP)},
+        activeUsers:{value:tA,trend:tr(tA,pA)},
+        newUserPercent:{value:nPct,trend:tr(nPct,pNP)}
+      },
       dailyData:days.map((d,j)=>({ date:d.date.split('-')[2], sessions:d.sessions, sessionsPrev:prevArr[j]?prevArr[j].sessions:0 }))
     };
     availableMonths.push(key);
@@ -78,7 +84,7 @@ function processGA4Data(rows) {
 }
 
 // ============================================
-// STATIC DATA
+// STATIC FALLBACK DATA
 // ============================================
 const COMPETITORS_FALLBACK = [
   { domain:'unico.io',   name:'Unico',       tier:'leader',     organicKeywords:5400, keywordsTrend:1.11,  organicTraffic:39300, trafficTrend:0.29,  paidKeywords:0, paidTraffic:0,   paidTrafficTrend:0,     refDomains:2900, refTrend:-3.5,  authorityScore:36, authorityChange:-3, isOwn:false, highlight:false },
@@ -130,6 +136,7 @@ function parseCSV(text) {
     return row;
   });
 }
+
 function parseBriefCSV(text) {
   const data={};
   text.trim().split('\n').slice(1).forEach(line => {
@@ -143,7 +150,9 @@ function parseBriefCSV(text) {
 // SPARKLINE
 // ============================================
 const Sparkline = ({ data, width=500, height=140 }) => {
-  if (!data||data.length===0) return <div style={{height,display:'flex',alignItems:'center',justifyContent:'center',color:'#64748b',fontSize:'13px'}}>Sem dados</div>;
+  if (!data||data.length===0) return (
+    <div style={{height,display:'flex',alignItems:'center',justifyContent:'center',color:'#64748b',fontSize:'13px'}}>Sem dados</div>
+  );
   const mx=Math.max(...data.map(d=>Math.max(d.sessions,d.sessionsPrev)));
   const pad={top:20,right:20,bottom:30,left:10};
   const cw=width-pad.left-pad.right, ch=height-pad.top-pad.bottom;
@@ -182,7 +191,10 @@ const ExecutiveBrief = ({ data }) => {
     <div style={{background:'#0f172a',borderRadius:'12px',padding:'20px',border:'1px solid #334155',height:'100%',display:'flex',flexDirection:'column'}}>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'16px'}}>
         <div style={{fontSize:'12px',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px',fontWeight:'600'}}>📋 Executive Brief</div>
-        <button onClick={()=>{navigator.clipboard.writeText(`📊 Certta SEO - ${data.updatedAt}\n✅ ${data.title}\n• ${data.highlight1}\n• ${data.highlight2}\n⚠️ ${data.gap}\n🎯 ${data.next1} / ${data.next2} / ${data.next3}`).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2000)});}} style={{background:copied?'#10b981':'#3b82f6',color:'#fff',border:'none',padding:'6px 12px',borderRadius:'6px',fontSize:'11px',cursor:'pointer'}}>
+        <button onClick={()=>{
+          navigator.clipboard.writeText(`📊 Certta SEO - ${data.updatedAt}\n✅ ${data.title}\n• ${data.highlight1}\n• ${data.highlight2}\n⚠️ ${data.gap}\n🎯 ${data.next1} / ${data.next2} / ${data.next3}`)
+            .then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2000)});
+        }} style={{background:copied?'#10b981':'#3b82f6',color:'#fff',border:'none',padding:'6px 12px',borderRadius:'6px',fontSize:'11px',cursor:'pointer'}}>
           {copied?'✓ Copiado!':'📤 Copiar'}
         </button>
       </div>
@@ -209,23 +221,27 @@ const ExecutiveBrief = ({ data }) => {
 // APP
 // ============================================
 export default function App() {
-  const [competitors,setCompetitors]       = useState(COMPETITORS_FALLBACK);
-  const [lastUpdated,setLastUpdated]       = useState('Mar 2026');
-  const [brief,setBrief]                   = useState(BRIEF_FALLBACK);
-  const [dataSource,setDataSource]         = useState('fallback');
-  const [loading,setLoading]               = useState(true);
-  const [ga4Data,setGa4Data]               = useState(GA4_FALLBACK);
-  const [months,setMonths]                 = useState(['Fev 2026']);
-  const [month,setMonth]                   = useState('Fev 2026');
-  const [ga4Src,setGa4Src]                 = useState('fallback');
-  const [hRow,setHRow]                     = useState(null);
-  const [hComp,setHComp]                   = useState(null);
+  const [competitors,setCompetitors] = useState(COMPETITORS_FALLBACK);
+  const [lastUpdated,setLastUpdated] = useState('Mar 2026');
+  const [brief,setBrief]             = useState(BRIEF_FALLBACK);
+  const [dataSource,setDataSource]   = useState('fallback');
+  const [loading,setLoading]         = useState(true);
+  const [ga4Data,setGa4Data]         = useState(GA4_FALLBACK);
+  const [months,setMonths]           = useState(['Fev 2026']);
+  const [month,setMonth]             = useState('Fev 2026');
+  const [ga4Src,setGa4Src]           = useState('fallback');
+  const [hRow,setHRow]               = useState(null);
+  const [hComp,setHComp]             = useState(null);
 
-  const g4 = ga4Data[month] || { metrics:{sessions:{value:0,trend:0},pageViews:{value:0,trend:0},activeUsers:{value:0,trend:0},newUserPercent:{value:0,trend:0}}, dailyData:[] };
+  const g4 = ga4Data[month] || {
+    metrics:{ sessions:{value:0,trend:0}, pageViews:{value:0,trend:0}, activeUsers:{value:0,trend:0}, newUserPercent:{value:0,trend:0} },
+    dailyData:[]
+  };
 
   useEffect(()=>{
     (async()=>{
       let ok=false;
+      // GA4
       try {
         const r=await fetch(SHEETS_CONFIG.ga4Url);
         if (!r.ok) throw new Error();
@@ -235,17 +251,20 @@ export default function App() {
           if (ms.length>0) { setGa4Data(ga4Monthly); setMonths(ms); setMonth(ms[ms.length-1]); setGa4Src('sheets'); ok=true; }
         }
       } catch(e){}
+      // Competitors
       try {
         const r=await fetch(SHEETS_CONFIG.competitorsUrl);
         const d=parseCSV(await r.text());
         if (d.length>0) { setCompetitors(d); setDataSource('sheets'); ok=true; }
       } catch(e){}
+      // Config
       try {
         const r=await fetch(SHEETS_CONFIG.configUrl);
         const d=parseCSV(await r.text());
         const row=d.find(r=>r.key==='lastUpdated');
         if (row) setLastUpdated(row.value);
       } catch(e){}
+      // Brief
       try {
         const r=await fetch(SHEETS_CONFIG.executiveBriefUrl);
         const d=parseBriefCSV(await r.text());
@@ -257,11 +276,11 @@ export default function App() {
   },[]);
 
   // helpers
-  const fmt    = n=>n>=1e6?`${(n/1e6).toFixed(1)}M`:n>=1000?`${(n/1000).toFixed(1)}K`:String(n);
-  const tc     = v=>v>10?'#10b981':v>0?'#6ee7b7':v>-10?'#fbbf24':'#ef4444';
-  const ti     = v=>v>0?'↑':v<0?'↓':'—';
-  const ac     = s=>s>=60?'#7c3aed':s>=40?'#3b82f6':s>=25?'#06b6d4':'#94a3b8';
-  const tb     = t=>({
+  const fmt = n=>n>=1e6?`${(n/1e6).toFixed(1)}M`:n>=1000?`${(n/1000).toFixed(1)}K`:String(n);
+  const tc  = v=>v>10?'#10b981':v>0?'#6ee7b7':v>-10?'#fbbf24':'#ef4444';
+  const ti  = v=>v>0?'↑':v<0?'↓':'—';
+  const ac  = s=>s>=60?'#7c3aed':s>=40?'#3b82f6':s>=25?'#06b6d4':'#94a3b8';
+  const tb  = t=>({
     enterprise:{bg:'#7c3aed20',color:'#7c3aed',label:'Enterprise'},
     leader:    {bg:'#3b82f620',color:'#3b82f6',label:'Market Leader'},
     competitor:{bg:'#06b6d420',color:'#06b6d4',label:'Direct Competitor'},
@@ -296,7 +315,7 @@ export default function App() {
     paidPresence:   Math.max(...sd.map(c=>c.paidPresence))||1,
   };
   const AXES=['Organic Keywords','Organic Traffic','Ref Domains','Authority Score','Paid Presence'];
-  const CX=220,CY=200,RAD=140;
+  const CX=220, CY=200, RAD=140;
   const spt=(v,ai)=>{ const a=(Math.PI*2*ai)/AXES.length-Math.PI/2; const r=(v/100)*RAD; return {x:CX+r*Math.cos(a),y:CY+r*Math.sin(a)}; };
   const spoly=vals=>vals.map((v,i)=>{const p=spt(v,i);return `${p.x},${p.y}`;}).join(' ');
   const snorm=c=>[(c.organicKeywords/mv.organicKeywords)*100,(c.organicTraffic/mv.organicTraffic)*100,(c.refDomains/mv.refDomains)*100,c.authorityScore,(c.paidPresence/mv.paidPresence)*100];
@@ -346,10 +365,10 @@ export default function App() {
         <div style={{display:'grid',gridTemplateColumns:'1fr 1.2fr',gap:'24px'}}>
           <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:'12px'}}>
             {[
-              {label:'Sessions',    value:fmt(g4.metrics.sessions.value),       trend:g4.metrics.sessions.trend},
-              {label:'Page Views',  value:fmt(g4.metrics.pageViews.value),      trend:g4.metrics.pageViews.trend},
-              {label:'Active Users',value:fmt(g4.metrics.activeUsers.value),    trend:g4.metrics.activeUsers.trend},
-              {label:'New Users %', value:`${g4.metrics.newUserPercent.value}%`,trend:g4.metrics.newUserPercent.trend},
+              {label:'Sessions',    value:fmt(g4.metrics.sessions.value),        trend:g4.metrics.sessions.trend},
+              {label:'Page Views',  value:fmt(g4.metrics.pageViews.value),       trend:g4.metrics.pageViews.trend},
+              {label:'Active Users',value:fmt(g4.metrics.activeUsers.value),     trend:g4.metrics.activeUsers.trend},
+              {label:'New Users %', value:`${g4.metrics.newUserPercent.value}%`, trend:g4.metrics.newUserPercent.trend},
             ].map(k=>(
               <div key={k.label} style={S.inn}>
                 <div style={{fontSize:'11px',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:'8px'}}>{k.label}</div>
@@ -426,7 +445,10 @@ export default function App() {
                     {icon:'⭐',label:'Authority',   value:cc.authorityScore,       trend:crow.authorityChange||0},
                   ].map(k=>(
                     <div key={k.label} style={S.inn}>
-                      <div style={{display:'flex',alignItems:'center',gap:'6px',marginBottom:'8px'}}><span>{k.icon}</span><span style={{fontSize:'10px',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px'}}>{k.label}</span></div>
+                      <div style={{display:'flex',alignItems:'center',gap:'6px',marginBottom:'8px'}}>
+                        <span>{k.icon}</span>
+                        <span style={{fontSize:'10px',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px'}}>{k.label}</span>
+                      </div>
                       <div style={{fontSize:'20px',fontWeight:'700',color:'#f8fafc',marginBottom:'4px'}}>{k.value}</div>
                       <div style={{fontSize:'11px',color:tc(k.trend),fontWeight:'500'}}>{ti(k.trend)} {Math.abs(k.trend).toFixed(1)}%</div>
                     </div>
@@ -453,12 +475,18 @@ export default function App() {
             <div style={{fontSize:'16px',fontWeight:'600',color:'#f8fafc'}}>Detailed Competitive Metrics</div>
           </div>
           <div style={{display:'grid',gridTemplateColumns:'140px repeat(5,1fr)',gap:'4px',padding:'12px 20px',background:'#0f172a',borderBottom:'1px solid #334155',fontSize:'10px',fontWeight:'600',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px'}}>
-            <div>Domain</div><div style={{textAlign:'right'}}>KWs</div><div style={{textAlign:'right'}}>Traffic</div><div style={{textAlign:'right'}}>Paid</div><div style={{textAlign:'right'}}>Refs</div><div style={{textAlign:'center'}}>Auth</div>
+            <div>Domain</div>
+            <div style={{textAlign:'right'}}>KWs</div>
+            <div style={{textAlign:'right'}}>Traffic</div>
+            <div style={{textAlign:'right'}}>Paid</div>
+            <div style={{textAlign:'right'}}>Refs</div>
+            <div style={{textAlign:'center'}}>Auth</div>
           </div>
           {competitors.map((c,idx)=>{
             const ts=tb(c.tier);
             return (
-              <div key={c.domain} onMouseEnter={()=>setHRow(idx)} onMouseLeave={()=>setHRow(null)} style={{display:'grid',gridTemplateColumns:'140px repeat(5,1fr)',gap:'4px',padding:'12px 20px',borderBottom:idx<competitors.length-1?'1px solid #334155':'none',background:c.highlight?'linear-gradient(90deg,#10b98110,transparent)':c.isOwn&&!c.highlight?'linear-gradient(90deg,#ef444410,transparent)':hRow===idx?'#334155':'transparent',alignItems:'center'}}>
+              <div key={c.domain} onMouseEnter={()=>setHRow(idx)} onMouseLeave={()=>setHRow(null)}
+                style={{display:'grid',gridTemplateColumns:'140px repeat(5,1fr)',gap:'4px',padding:'12px 20px',borderBottom:idx<competitors.length-1?'1px solid #334155':'none',background:c.highlight?'linear-gradient(90deg,#10b98110,transparent)':c.isOwn&&!c.highlight?'linear-gradient(90deg,#ef444410,transparent)':hRow===idx?'#334155':'transparent',alignItems:'center'}}>
                 <div>
                   <div style={{fontWeight:'600',color:c.highlight?'#10b981':c.isOwn?'#f87171':'#f8fafc',fontSize:'13px'}}>{c.name}</div>
                   <span style={{background:ts.bg,color:ts.color,padding:'1px 6px',borderRadius:'8px',fontSize:'9px',fontWeight:'500'}}>{ts.label}</span>
@@ -492,137 +520,11 @@ export default function App() {
         <ExecutiveBrief data={brief}/>
       </div>
 
-      {/* ════════════════════════════════════════
-          SMARKETING — VALORES 100% HARDCODED
-          Leads=304 MQL=173 SQL=143 Deals=3
-          OpenOpp=285.755 PotMRR=142.877
-          ════════════════════════════════════════ */}
-      <div style={S.card}>
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'20px'}}>
-          <div>
-            <div style={{fontSize:'16px',fontWeight:'600',color:'#f8fafc',marginBottom:'4px'}}>Smarketing Performance</div>
-            <div style={{fontSize:'12px',color:'#64748b'}}>Full-funnel results: from lead generation to closed revenue</div>
-          </div>
-          <span style={{background:'#06b6d420',color:'#06b6d4',padding:'4px 12px',borderRadius:'12px',fontSize:'11px',fontWeight:'500'}}>YTD 2026</span>
-        </div>
-
-        {/* ── Score cards ── */}
-        <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:'16px',marginBottom:'24px'}}>
-          <div style={{background:'linear-gradient(135deg,#065f46,#047857)',borderRadius:'12px',padding:'20px',border:'1px solid #10b98140'}}>
-            <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'12px'}}>
-              <span style={{fontSize:'20px'}}>💼</span>
-              <span style={{fontSize:'11px',color:'#a7f3d0',textTransform:'uppercase',letterSpacing:'0.5px',fontWeight:'500'}}>Open Opportunities</span>
-            </div>
-            <div style={{fontSize:'36px',fontWeight:'700',color:'#fff',marginBottom:'6px'}}>R$ 285.755</div>
-            <div style={{fontSize:'13px',color:'#a7f3d0'}}>Pipeline total em aberto</div>
-          </div>
-          <div style={{background:'linear-gradient(135deg,#1e3a8a,#2563eb)',borderRadius:'12px',padding:'20px',border:'1px solid #3b82f640'}}>
-            <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'12px'}}>
-              <span style={{fontSize:'20px'}}>📈</span>
-              <span style={{fontSize:'11px',color:'#bfdbfe',textTransform:'uppercase',letterSpacing:'0.5px',fontWeight:'500'}}>Potencial MRR</span>
-            </div>
-            <div style={{fontSize:'36px',fontWeight:'700',color:'#fff',marginBottom:'6px'}}>R$ 142.877</div>
-            <div style={{fontSize:'13px',color:'#bfdbfe'}}>Receita recorrente potencial</div>
-          </div>
-        </div>
-
-        {/* ── Funil ── */}
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'24px'}}>
-
-          {/* KPI cards */}
-          <div style={{display:'flex',flexDirection:'column',gap:'12px'}}>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:'12px'}}>
-              <div style={{background:'#0f172a',borderRadius:'10px',padding:'14px',border:'1px solid #334155'}}>
-                <div style={{fontSize:'10px',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:'6px'}}>Leads</div>
-                <div style={{fontSize:'32px',fontWeight:'700',color:'#3b82f6',marginBottom:'2px'}}>304</div>
-                <div style={{fontSize:'11px',color:'#475569'}}>Total gerado</div>
-              </div>
-              <div style={{background:'#0f172a',borderRadius:'10px',padding:'14px',border:'1px solid #334155'}}>
-                <div style={{fontSize:'10px',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:'6px'}}>MQL</div>
-                <div style={{fontSize:'32px',fontWeight:'700',color:'#f97316',marginBottom:'2px'}}>173</div>
-                <div style={{fontSize:'11px',color:'#475569'}}>56.9% dos leads</div>
-              </div>
-              <div style={{background:'#0f172a',borderRadius:'10px',padding:'14px',border:'1px solid #334155'}}>
-                <div style={{fontSize:'10px',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:'6px'}}>SQL</div>
-                <div style={{fontSize:'32px',fontWeight:'700',color:'#8b5cf6',marginBottom:'2px'}}>143</div>
-                <div style={{fontSize:'11px',color:'#475569'}}>82.7% dos MQL</div>
-              </div>
-              <div style={{background:'#0f172a',borderRadius:'10px',padding:'14px',border:'1px solid #334155'}}>
-                <div style={{fontSize:'10px',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:'6px'}}>Deals</div>
-                <div style={{fontSize:'32px',fontWeight:'700',color:'#10b981',marginBottom:'2px'}}>3</div>
-                <div style={{fontSize:'11px',color:'#475569'}}>Win rate 0.99%</div>
-              </div>
-            </div>
-
-            {/* Taxas */}
-            <div style={S.inn}>
-              <div style={{fontSize:'11px',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:'12px'}}>Taxas de Conversão</div>
-              {[
-                {label:'Lead → MQL', pct:56.9, color:'#f97316'},
-                {label:'MQL → SQL',  pct:82.7, color:'#8b5cf6'},
-                {label:'SQL → Deal', pct:2.1,  color:'#10b981'},
-                {label:'Lead → Deal',pct:0.99, color:'#06b6d4'},
-              ].map(r=>(
-                <div key={r.label} style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'8px'}}>
-                  <span style={{fontSize:'12px',color:'#94a3b8',width:'90px',flexShrink:0}}>{r.label}</span>
-                  <div style={{flex:1,background:'#1e293b',borderRadius:'4px',height:'20px',overflow:'hidden'}}>
-                    <div style={{width:`${Math.min(r.pct,100)}%`,height:'100%',background:r.color,borderRadius:'4px',display:'flex',alignItems:'center',paddingLeft:'8px',minWidth:'40px'}}>
-                      <span style={{fontSize:'10px',fontWeight:'700',color:'#fff',whiteSpace:'nowrap'}}>{r.pct}%</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Funil visual */}
-          <div style={S.inn}>
-            <div style={{fontSize:'11px',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:'16px'}}>Sales Funnel</div>
-            {[
-              {name:'Leads', value:304, pct:100,   conv:'100%', color:'#3b82f6'},
-              {name:'MQL',   value:173, pct:56.9,  conv:'56.9%',color:'#f97316'},
-              {name:'SQL',   value:143, pct:47.0,  conv:'82.7%',color:'#8b5cf6'},
-              {name:'Deals', value:3,   pct:0.99,  conv:'2.1%', color:'#10b981'},
-            ].map(s=>(
-              <div key={s.name} style={{marginBottom:'12px'}}>
-                <div style={{display:'flex',justifyContent:'space-between',marginBottom:'6px'}}>
-                  <span style={{fontSize:'12px',color:'#94a3b8',fontWeight:'500'}}>{s.name}</span>
-                  <span style={{fontSize:'14px',color:'#f8fafc',fontWeight:'600'}}>{s.value}</span>
-                </div>
-                <div style={{height:'28px',background:'#1e293b',borderRadius:'6px',overflow:'hidden'}}>
-                  <div style={{width:`${Math.max(s.pct,1)}%`,height:'100%',background:`linear-gradient(90deg,${s.color},${s.color}cc)`,borderRadius:'6px',display:'flex',alignItems:'center',paddingLeft:'10px',minWidth:'50px'}}>
-                    <span style={{fontSize:'11px',fontWeight:'600',color:'#fff'}}>{s.conv}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            <div style={{marginTop:'20px',paddingTop:'16px',borderTop:'1px solid #334155',display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:'16px'}}>
-              <div>
-                <div style={{fontSize:'10px',color:'#64748b',textTransform:'uppercase',marginBottom:'4px'}}>Lead → Deal</div>
-                <div style={{fontSize:'20px',fontWeight:'700',color:'#10b981'}}>0.99%</div>
-              </div>
-              <div>
-                <div style={{fontSize:'10px',color:'#64748b',textTransform:'uppercase',marginBottom:'4px'}}>Open Opp</div>
-                <div style={{fontSize:'20px',fontWeight:'700',color:'#f8fafc'}}>R$ 285.7K</div>
-              </div>
-              <div>
-                <div style={{fontSize:'10px',color:'#64748b',textTransform:'uppercase',marginBottom:'4px'}}>Deals Fechados</div>
-                <div style={{fontSize:'20px',fontWeight:'700',color:'#10b981'}}>3</div>
-              </div>
-              <div>
-                <div style={{fontSize:'10px',color:'#64748b',textTransform:'uppercase',marginBottom:'4px'}}>Pot. MRR</div>
-                <div style={{fontSize:'20px',fontWeight:'700',color:'#3b82f6'}}>R$ 142.9K</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* FOOTER */}
       <div style={{textAlign:'center',fontSize:'12px',color:'#475569'}}>
         Built by AdRoq • GA4 + Semrush + HubSpot • Last update: {lastUpdated}
       </div>
+
     </div>
   );
 }
