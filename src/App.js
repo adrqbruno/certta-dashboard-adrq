@@ -582,25 +582,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Taxas de conversão */}
-            <div style={S.inn}>
-              <div style={{fontSize:'11px',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:'14px'}}>Taxas de Conversão</div>
-              {[
-                {label:'Lead → MQL', pct:56.9, color:'#f97316'},
-                {label:'MQL → SQL',  pct:82.7, color:'#8b5cf6'},
-                {label:'SQL → Deal', pct:2.1,  color:'#10b981'},
-                {label:'Lead → Deal',pct:0.99, color:'#06b6d4'},
-              ].map(r=>(
-                <div key={r.label} style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'10px'}}>
-                  <span style={{fontSize:'12px',color:'#94a3b8',width:'92px',flexShrink:0}}>{r.label}</span>
-                  <div style={{flex:1,background:'#1e293b',borderRadius:'4px',height:'22px',overflow:'hidden'}}>
-                    <div style={{width:`${Math.min(r.pct,100)}%`,height:'100%',background:r.color,borderRadius:'4px',display:'flex',alignItems:'center',paddingLeft:'8px',minWidth:'44px'}}>
-                      <span style={{fontSize:'11px',fontWeight:'700',color:'#fff',whiteSpace:'nowrap'}}>{r.pct}%</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+
           </div>
 
           {/* Direita: funil visual */}
