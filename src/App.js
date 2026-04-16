@@ -520,6 +520,134 @@ export default function App() {
         <ExecutiveBrief data={brief}/>
       </div>
 
+      {/* ══════════════════════════════════════
+          SMARKETING PERFORMANCE
+          Leads=304 MQL=173 SQL=143 Deals=3
+          OpenOpp=R$285.755 PotMRR=R$142.877
+          ══════════════════════════════════════ */}
+      <div style={S.card}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'20px'}}>
+          <div>
+            <div style={{fontSize:'16px',fontWeight:'600',color:'#f8fafc',marginBottom:'4px'}}>Smarketing Performance</div>
+            <div style={{fontSize:'12px',color:'#64748b'}}>Full-funnel results: from lead generation to closed revenue</div>
+          </div>
+          <span style={{background:'#06b6d420',color:'#06b6d4',padding:'4px 12px',borderRadius:'12px',fontSize:'11px',fontWeight:'500'}}>YTD 2026</span>
+        </div>
+
+        {/* Score cards */}
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px',marginBottom:'24px'}}>
+          <div style={{background:'linear-gradient(135deg,#065f46,#047857)',borderRadius:'12px',padding:'24px',border:'1px solid #10b98140'}}>
+            <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'12px'}}>
+              <span style={{fontSize:'20px'}}>💼</span>
+              <span style={{fontSize:'11px',color:'#a7f3d0',textTransform:'uppercase',letterSpacing:'0.5px',fontWeight:'600'}}>Open Opportunities</span>
+            </div>
+            <div style={{fontSize:'40px',fontWeight:'700',color:'#fff',marginBottom:'8px'}}>R$ 285.755</div>
+            <div style={{fontSize:'13px',color:'#a7f3d0'}}>Pipeline total em aberto</div>
+          </div>
+          <div style={{background:'linear-gradient(135deg,#1e3a8a,#2563eb)',borderRadius:'12px',padding:'24px',border:'1px solid #3b82f640'}}>
+            <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'12px'}}>
+              <span style={{fontSize:'20px'}}>📈</span>
+              <span style={{fontSize:'11px',color:'#bfdbfe',textTransform:'uppercase',letterSpacing:'0.5px',fontWeight:'600'}}>Potencial MRR</span>
+            </div>
+            <div style={{fontSize:'40px',fontWeight:'700',color:'#fff',marginBottom:'8px'}}>R$ 142.877</div>
+            <div style={{fontSize:'13px',color:'#bfdbfe'}}>Receita recorrente potencial</div>
+          </div>
+        </div>
+
+        {/* Funil + KPIs */}
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'24px'}}>
+
+          {/* Esquerda: KPI cards + taxas */}
+          <div style={{display:'flex',flexDirection:'column',gap:'12px'}}>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px'}}>
+              <div style={{background:'#0f172a',borderRadius:'10px',padding:'16px',border:'1px solid #334155'}}>
+                <div style={{fontSize:'10px',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:'6px'}}>Leads</div>
+                <div style={{fontSize:'34px',fontWeight:'700',color:'#3b82f6',marginBottom:'4px'}}>304</div>
+                <div style={{fontSize:'11px',color:'#475569'}}>Total gerado</div>
+              </div>
+              <div style={{background:'#0f172a',borderRadius:'10px',padding:'16px',border:'1px solid #334155'}}>
+                <div style={{fontSize:'10px',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:'6px'}}>MQL</div>
+                <div style={{fontSize:'34px',fontWeight:'700',color:'#f97316',marginBottom:'4px'}}>173</div>
+                <div style={{fontSize:'11px',color:'#475569'}}>56.9% dos leads</div>
+              </div>
+              <div style={{background:'#0f172a',borderRadius:'10px',padding:'16px',border:'1px solid #334155'}}>
+                <div style={{fontSize:'10px',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:'6px'}}>SQL</div>
+                <div style={{fontSize:'34px',fontWeight:'700',color:'#8b5cf6',marginBottom:'4px'}}>143</div>
+                <div style={{fontSize:'11px',color:'#475569'}}>82.7% dos MQL</div>
+              </div>
+              <div style={{background:'#0f172a',borderRadius:'10px',padding:'16px',border:'1px solid #334155'}}>
+                <div style={{fontSize:'10px',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:'6px'}}>Deals</div>
+                <div style={{fontSize:'34px',fontWeight:'700',color:'#10b981',marginBottom:'4px'}}>3</div>
+                <div style={{fontSize:'11px',color:'#475569'}}>Win rate 0.99%</div>
+              </div>
+            </div>
+
+            {/* Taxas de conversão */}
+            <div style={S.inn}>
+              <div style={{fontSize:'11px',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:'14px'}}>Taxas de Conversão</div>
+              {[
+                {label:'Lead → MQL', pct:56.9, color:'#f97316'},
+                {label:'MQL → SQL',  pct:82.7, color:'#8b5cf6'},
+                {label:'SQL → Deal', pct:2.1,  color:'#10b981'},
+                {label:'Lead → Deal',pct:0.99, color:'#06b6d4'},
+              ].map(r=>(
+                <div key={r.label} style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'10px'}}>
+                  <span style={{fontSize:'12px',color:'#94a3b8',width:'92px',flexShrink:0}}>{r.label}</span>
+                  <div style={{flex:1,background:'#1e293b',borderRadius:'4px',height:'22px',overflow:'hidden'}}>
+                    <div style={{width:`${Math.min(r.pct,100)}%`,height:'100%',background:r.color,borderRadius:'4px',display:'flex',alignItems:'center',paddingLeft:'8px',minWidth:'44px'}}>
+                      <span style={{fontSize:'11px',fontWeight:'700',color:'#fff',whiteSpace:'nowrap'}}>{r.pct}%</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Direita: funil visual */}
+          <div style={S.inn}>
+            <div style={{fontSize:'11px',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:'18px'}}>Sales Funnel</div>
+            {[
+              {name:'Leads', value:304, barPct:100,  conv:'100%', color:'#3b82f6'},
+              {name:'MQL',   value:173, barPct:56.9, conv:'56.9%',color:'#f97316'},
+              {name:'SQL',   value:143, barPct:47.0, conv:'82.7%',color:'#8b5cf6'},
+              {name:'Deals', value:3,   barPct:2.5,  conv:'2.1%', color:'#10b981'},
+            ].map(s=>(
+              <div key={s.name} style={{marginBottom:'14px'}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'6px'}}>
+                  <span style={{fontSize:'12px',color:'#94a3b8',fontWeight:'500'}}>{s.name}</span>
+                  <span style={{fontSize:'14px',color:'#f8fafc',fontWeight:'700'}}>{s.value}</span>
+                </div>
+                <div style={{height:'28px',background:'#1e293b',borderRadius:'6px',overflow:'hidden'}}>
+                  <div style={{width:`${s.barPct}%`,height:'100%',background:`linear-gradient(90deg,${s.color},${s.color}bb)`,borderRadius:'6px',display:'flex',alignItems:'center',paddingLeft:'10px',minWidth:'52px'}}>
+                    <span style={{fontSize:'11px',fontWeight:'700',color:'#fff'}}>{s.conv}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {/* Resumo */}
+            <div style={{marginTop:'20px',paddingTop:'16px',borderTop:'1px solid #334155',display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px'}}>
+              <div>
+                <div style={{fontSize:'10px',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:'4px'}}>Lead → Deal</div>
+                <div style={{fontSize:'22px',fontWeight:'700',color:'#10b981'}}>0.99%</div>
+              </div>
+              <div>
+                <div style={{fontSize:'10px',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:'4px'}}>Open Opp</div>
+                <div style={{fontSize:'22px',fontWeight:'700',color:'#f8fafc'}}>R$ 285.7K</div>
+              </div>
+              <div>
+                <div style={{fontSize:'10px',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:'4px'}}>Deals Fechados</div>
+                <div style={{fontSize:'22px',fontWeight:'700',color:'#10b981'}}>3</div>
+              </div>
+              <div>
+                <div style={{fontSize:'10px',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:'4px'}}>Pot. MRR</div>
+                <div style={{fontSize:'22px',fontWeight:'700',color:'#3b82f6'}}>R$ 142.9K</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* FOOTER */}
       <div style={{textAlign:'center',fontSize:'12px',color:'#475569'}}>
         Built by AdRoq • GA4 + Semrush + HubSpot • Last update: {lastUpdated}
