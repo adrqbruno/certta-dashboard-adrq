@@ -122,7 +122,7 @@ const FALLBACK_DATA = {
   ]
 };
 
-// ── FUNIL 100% ESTÁTICO — não há nenhum fetch que sobrescreva ──
+// ── FUNIL 100% ESTÁTICO — BUILD 2026-04-16T001 ──
 const FUNNEL_DATA = {
   period:       'YTD 2026',
   openOpp:      285755,
